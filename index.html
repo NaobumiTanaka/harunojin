@@ -1,4 +1,595 @@
-Btn.disabled = false;
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Harunojin Trail 草刈り管理</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f5f5f5; }
+
+/* Header */
+.header {
+  background: #1a5c2e; color: white; padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.header h1 { font-size: 16px; font-weight: 700; }
+.header-sub { font-size: 11px; opacity: 0.8; }
+.refresh-btn {
+  background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+  color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer;
+}
+.refresh-btn:active { background: rgba(255,255,255,0.3); }
+
+/* Progress bar */
+.progress-bar {
+  position: fixed; top: 52px; left: 0; right: 0; z-index: 999;
+  background: #e0e0e0; height: 6px;
+}
+.progress-fill { height: 100%; transition: width 0.5s ease; }
+
+/* Map */
+#map { position: fixed; top: 58px; left: 0; right: 0; bottom: 0; z-index: 1; }
+
+/* Stats overlay */
+.stats-overlay {
+  position: fixed; bottom: 16px; left: 16px; z-index: 900;
+  background: white; border-radius: 12px; padding: 12px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15); font-size: 13px;
+  display: flex; gap: 16px;
+}
+.stat-item { text-align: center; }
+.stat-num { font-size: 20px; font-weight: 700; }
+.stat-label { font-size: 10px; color: #666; margin-top: 2px; }
+.stat-red .stat-num { color: #d32f2f; }
+.stat-yellow .stat-num { color: #f9a825; }
+.stat-green .stat-num { color: #2e7d32; }
+
+/* List toggle */
+.list-toggle {
+  position: fixed; bottom: 16px; right: 16px; z-index: 900;
+  background: #1a5c2e; color: white; border: none;
+  width: 48px; height: 48px; border-radius: 50%;
+  font-size: 20px; cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Section list panel */
+.list-panel {
+  position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px;
+  height: 100%; background: white; z-index: 2000;
+  transition: right 0.3s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+  display: flex; flex-direction: column;
+}
+.list-panel.open { right: 0; }
+.list-panel-header {
+  background: #1a5c2e; color: white; padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.list-panel-header h2 { font-size: 16px; }
+.list-close { background: none; border: none; color: white; font-size: 24px; cursor: pointer; padding: 4px; }
+.list-content { flex: 1; overflow-y: auto; padding: 8px; }
+.list-area-header {
+  font-size: 13px; font-weight: 700; color: #1a5c2e;
+  padding: 8px 8px 4px; margin-top: 4px; border-bottom: 1px solid #e0e0e0;
+}
+.list-item {
+  display: flex; align-items: center; padding: 10px 8px; gap: 10px;
+  border-bottom: 1px solid #f0f0f0; cursor: pointer;
+}
+.list-item:active { background: #f5f5f5; }
+.list-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.list-info { flex: 1; }
+.list-name { font-size: 13px; font-weight: 600; }
+.list-meta { font-size: 11px; color: #888; margin-top: 2px; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000;
+  display: none; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white; border-radius: 16px 16px 0 0; padding: 20px;
+  width: 100%; max-width: 480px; max-height: 80vh; overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal h3 { font-size: 16px; margin-bottom: 4px; }
+.modal-area { font-size: 12px; color: #888; margin-bottom: 16px; }
+.status-btns { display: flex; gap: 8px; margin-bottom: 16px; }
+.status-btn {
+  flex: 1; padding: 10px 8px; border: 2px solid #ddd; border-radius: 8px;
+  background: white; cursor: pointer; text-align: center; font-size: 13px; font-weight: 600;
+  transition: all 0.2s;
+}
+.status-btn[data-status="not_started"] { color: #d32f2f; }
+.status-btn[data-status="in_progress"] { color: #f9a825; }
+.status-btn[data-status="completed"] { color: #2e7d32; }
+.status-btn.active { transform: scale(1.05); }
+.status-btn.active[data-status="not_started"] { background: #ffebee; border-color: #d32f2f; }
+.status-btn.active[data-status="in_progress"] { background: #fff8e1; border-color: #f9a825; }
+.status-btn.active[data-status="completed"] { background: #e8f5e9; border-color: #2e7d32; }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+.form-group input, .form-group textarea {
+  width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;
+  font-size: 14px; font-family: inherit;
+}
+.form-group textarea { height: 60px; resize: none; }
+.save-btn {
+  width: 100%; padding: 14px; background: #1a5c2e; color: white;
+  border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
+  cursor: pointer; margin-top: 8px;
+}
+.save-btn:disabled { opacity: 0.5; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: #333; color: white; padding: 10px 20px; border-radius: 8px;
+  font-size: 13px; z-index: 5000; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* Loading */
+.loading-overlay {
+  position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 4000;
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column; gap: 12px;
+}
+.loading-overlay.show { display: flex; }
+.loading-spinner {
+  width: 36px; height: 36px; border: 3px solid #e0e0e0;
+  border-top-color: #1a5c2e; border-radius: 50%; animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Legend */
+.legend {
+  position: fixed; bottom: 16px; right: 70px; z-index: 900;
+  background: white; border-radius: 8px; padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 11px;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+.legend-color { width: 20px; height: 3px; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <h1>Harunojin Trail 草刈り管理</h1>
+    <div class="header-sub" id="lastUpdated">読み込み中...</div>
+  </div>
+  <button class="refresh-btn" onclick="loadData()">↻ 更新</button>
+</div>
+
+<!-- Progress bar -->
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill" style="width:0%; background: linear-gradient(90deg, #2e7d32, #66bb6a);"></div>
+</div>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- Stats -->
+<div class="stats-overlay">
+  <div class="stat-item stat-red"><div class="stat-num" id="countNotStarted">0</div><div class="stat-label">未着手</div></div>
+  <div class="stat-item stat-yellow"><div class="stat-num" id="countInProgress">0</div><div class="stat-label">作業中</div></div>
+  <div class="stat-item stat-green"><div class="stat-num" id="countCompleted">0</div><div class="stat-label">完了</div></div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-color" style="background:#d32f2f;"></div>未着手</div>
+  <div class="legend-item"><div class="legend-color" style="background:#f9a825;"></div>作業中</div>
+  <div class="legend-item"><div class="legend-color" style="background:#2e7d32;"></div>完了</div>
+</div>
+
+<!-- List toggle button -->
+<button class="list-toggle" onclick="toggleList()">☰</button>
+
+<!-- Section list panel -->
+<div class="list-panel" id="listPanel">
+  <div class="list-panel-header">
+    <h2>区間一覧</h2>
+    <button class="list-close" onclick="toggleList()">✕</button>
+  </div>
+  <div class="list-content" id="listContent"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modalTitle"></h3>
+    <div class="modal-area" id="modalArea"></div>
+    <div class="status-btns">
+      <button class="status-btn" data-status="not_started" onclick="selectStatus(this)">未着手</button>
+      <button class="status-btn" data-status="in_progress" onclick="selectStatus(this)">作業中</button>
+      <button class="status-btn" data-status="completed" onclick="selectStatus(this)">完了</button>
+    </div>
+    <div class="form-group">
+      <label>作業者名</label>
+      <input type="text" id="inputWorker" placeholder="名前を入力">
+    </div>
+    <div class="form-group">
+      <label>メモ</label>
+      <textarea id="inputMemo" placeholder="作業内容や気づきなど"></textarea>
+    </div>
+    <button class="save-btn" id="saveBtn" onclick="saveSection()">保存する</button>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div style="font-size:13px;color:#666;">読み込み中...</div>
+</div>
+
+<script>
+// =============================================
+// 設定 - ここを変更してください
+// =============================================
+const API_URL = 'https://script.google.com/a/macros/lastonemile.co.jp/s/AKfycbzVPnJVBqF7AKrHxjmvqxm94I22vhsFPrZUSeqBlwSXzky5o1PlVjhdnXOIphjub0ti5w/exec'; // ← Google Apps Script のデプロイURL
+// 例: 'https://script.google.com/macros/s/XXXXX/exec'
+
+// =============================================
+// コース座標データ — 起動時にGoogle My Maps KMLから取得
+// =============================================
+const KML_URL = 'https://www.google.com/maps/d/kml?mid=1PGd6THjqNEnfm1VogxyeYc8sHi548p8&forcekml=1';
+let COURSE_COORDS = []; // KML読み込み後にセットされる
+
+async function loadKML() {
+  try {
+    const res = await fetch(KML_URL);
+    const text = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const lineEl = doc.querySelector('LineString coordinates');
+    if (lineEl) {
+      COURSE_COORDS = lineEl.textContent.trim().split(/\s+/).map(c => {
+        const [lng, lat] = c.split(',').map(Number);
+        return [lat, lng];
+      });
+      console.log('KML loaded:', COURSE_COORDS.length, 'points');
+    }
+  } catch (e) {
+    console.error('KML load error:', e);
+    showToast('コースデータの読み込みに失敗しました');
+  }
+}
+
+// =============================================
+// 区間定義
+// =============================================
+const SECTIONS = [
+  { id:'sec-01', area:'松代城', name:'松代城スタート付近', startIdx:0, endIdx:50 },
+  { id:'sec-02', area:'太平', name:'太平への登り', startIdx:51, endIdx:96 },
+  { id:'sec-03', area:'太平〜会沢', name:'太平〜会沢', startIdx:97, endIdx:130 },
+  { id:'sec-04', area:'会沢', name:'会沢 入口', startIdx:131, endIdx:165 },
+  { id:'sec-05', area:'会沢', name:'会沢 中央', startIdx:166, endIdx:200 },
+  { id:'sec-06', area:'会沢', name:'会沢 奥', startIdx:201, endIdx:240 },
+  { id:'sec-07', area:'会沢〜蓬平', name:'会沢〜蓬平 前半', startIdx:241, endIdx:290 },
+  { id:'sec-08', area:'会沢〜蓬平', name:'会沢〜蓬平 後半', startIdx:291, endIdx:340 },
+  { id:'sec-09', area:'蓬平', name:'蓬平周辺', startIdx:341, endIdx:380 },
+  { id:'sec-10', area:'蓬平〜仙納', name:'蓬平〜仙納', startIdx:381, endIdx:420 },
+  { id:'sec-11', area:'仙納', name:'仙納周辺', startIdx:421, endIdx:453 },
+  { id:'sec-12', area:'田野倉', name:'田野倉', startIdx:454, endIdx:483 },
+  { id:'sec-13', area:'名平', name:'名平 前半', startIdx:484, endIdx:520 },
+  { id:'sec-14', area:'名平', name:'名平 後半', startIdx:521, endIdx:557 },
+  { id:'sec-15', area:'蒲生', name:'蒲生 前半', startIdx:558, endIdx:587 },
+  { id:'sec-16', area:'蒲生', name:'蒲生 後半', startIdx:588, endIdx:622 },
+  { id:'sec-17', area:'池尻', name:'池尻 入口', startIdx:623, endIdx:644 },
+  { id:'sec-18', area:'池尻', name:'池尻 中央', startIdx:645, endIdx:660 },
+  { id:'sec-19', area:'池尻', name:'池尻 奥', startIdx:661, endIdx:688 },
+  { id:'sec-20', area:'千年', name:'千年 前半', startIdx:689, endIdx:705 },
+  { id:'sec-21', area:'千年', name:'千年 後半', startIdx:706, endIdx:720 },
+  { id:'sec-22', area:'千年〜松代城', name:'千年〜松代城', startIdx:721, endIdx:740 },
+  { id:'sec-23', area:'松代城', name:'松代城周辺', startIdx:741, endIdx:759 },
+  { id:'sec-24', area:'能舞台', name:'能舞台 前半', startIdx:760, endIdx:770 },
+  { id:'sec-25', area:'能舞台', name:'能舞台〜ゴール', startIdx:771, endIdx:774 }
+];
+
+// エイドステーション
+const AID_STATIONS = [
+  { name: 'Aid Station 1', lat: 37.1248, lng: 138.6175 },
+  { name: 'Aid Station 2', lat: 37.1095, lng: 138.5930 },
+  { name: 'Aid Station 3', lat: 37.0920, lng: 138.6050 }
+];
+
+// ステータス色
+const STATUS_COLORS = {
+  not_started: '#d32f2f',
+  in_progress: '#f9a825',
+  completed: '#2e7d32'
+};
+
+// 状態
+let map;
+let sectionData = {};
+let sectionLayers = {};
+let currentSectionId = null;
+
+// =============================================
+// 地図初期化
+// =============================================
+function initMap() {
+  map = L.map('map', { zoomControl: true });
+
+  // 地理院タイル
+  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
+    attribution: '<a href="https://maps.gsi.go.jp/" target="_blank">地理院タイル</a>',
+    maxZoom: 18
+  }).addTo(map);
+
+  // 区間ポリライン
+  SECTIONS.forEach(sec => {
+    const coords = COURSE_COORDS.slice(sec.startIdx, sec.endIdx + 1);
+    if (coords.length < 2) return;
+
+    const polyline = L.polyline(coords, {
+      color: STATUS_COLORS.not_started,
+      weight: 5,
+      opacity: 0.85
+    }).addTo(map);
+
+    polyline.on('click', () => openModal(sec.id));
+    sectionLayers[sec.id] = polyline;
+  });
+
+  // エイドステーション
+  AID_STATIONS.forEach(as => {
+    L.marker([as.lat, as.lng], {
+      icon: L.divIcon({
+        className: '',
+        html: '<div style="background:#ff9800;color:white;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);">⛽ ' + as.name + '</div>',
+        iconSize: null
+      })
+    }).addTo(map);
+  });
+
+  // 全体表示
+  const allBounds = L.latLngBounds(COURSE_COORDS);
+  map.fitBounds(allBounds, { padding: [30, 30] });
+}
+
+// =============================================
+// JSONP通信ヘルパー（Workspace外部アクセス制限を回避）
+// =============================================
+function jsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_jsonp_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const timeout = setTimeout(() => {
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      reject(new Error('タイムアウト'));
+    }, 15000);
+
+    window[cbName] = function(data) {
+      clearTimeout(timeout);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      resolve(data);
+    };
+
+    const sep = url.includes('?') ? '&' : '?';
+    const script = document.createElement('script');
+    script.src = url + sep + 'callback=' + cbName;
+    script.onerror = () => {
+      clearTimeout(timeout);
+      delete window[cbName];
+      reject(new Error('通信エラー'));
+    };
+    document.body.appendChild(script);
+  });
+}
+
+// =============================================
+// データ読み込み
+// =============================================
+async function loadData() {
+  if (!API_URL) {
+    showToast('デモモード: API_URLを設定してください');
+    SECTIONS.forEach(sec => {
+      sectionData[sec.id] = {
+        status: 'not_started', worker: '', memo: '', updated_at: ''
+      };
+    });
+    updateUI();
+    return;
+  }
+
+  showLoading(true);
+  try {
+    const json = await jsonp(API_URL);
+    if (json.error) throw new Error(json.error);
+
+    json.sections.forEach(row => {
+      sectionData[row.section_id] = {
+        status: row.status || 'not_started',
+        worker: row.worker || '',
+        memo: row.memo || '',
+        updated_at: row.updated_at || ''
+      };
+    });
+    updateUI();
+    document.getElementById('lastUpdated').textContent = '最終更新: ' + new Date().toLocaleString('ja-JP');
+  } catch (err) {
+    showToast('読み込みエラー: ' + err.message);
+    console.error(err);
+  } finally {
+    showLoading(false);
+  }
+}
+
+// =============================================
+// UI更新
+// =============================================
+function updateUI() {
+  let counts = { not_started: 0, in_progress: 0, completed: 0 };
+
+  SECTIONS.forEach(sec => {
+    const data = sectionData[sec.id] || { status: 'not_started' };
+    const color = STATUS_COLORS[data.status] || STATUS_COLORS.not_started;
+
+    // ポリラインの色更新
+    if (sectionLayers[sec.id]) {
+      sectionLayers[sec.id].setStyle({ color });
+    }
+
+    counts[data.status] = (counts[data.status] || 0) + 1;
+  });
+
+  // カウント更新
+  document.getElementById('countNotStarted').textContent = counts.not_started;
+  document.getElementById('countInProgress').textContent = counts.in_progress;
+  document.getElementById('countCompleted').textContent = counts.completed;
+
+  // プログレスバー
+  const total = SECTIONS.length;
+  const pct = Math.round((counts.completed / total) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  // リスト更新
+  buildList();
+}
+
+// =============================================
+// 区間リスト
+// =============================================
+function buildList() {
+  const container = document.getElementById('listContent');
+  container.innerHTML = '';
+
+  let currentArea = '';
+  SECTIONS.forEach(sec => {
+    if (sec.area !== currentArea) {
+      currentArea = sec.area;
+      const header = document.createElement('div');
+      header.className = 'list-area-header';
+      header.textContent = currentArea;
+      container.appendChild(header);
+    }
+
+    const data = sectionData[sec.id] || { status: 'not_started' };
+    const color = STATUS_COLORS[data.status];
+    const statusText = { not_started: '未着手', in_progress: '作業中', completed: '完了' }[data.status] || '未着手';
+
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.onclick = () => { toggleList(); openModal(sec.id); };
+
+    let meta = statusText;
+    if (data.worker) meta += ' / ' + data.worker;
+    if (data.updated_at) {
+      const d = new Date(data.updated_at);
+      if (!isNaN(d)) meta += ' / ' + d.toLocaleDateString('ja-JP');
+    }
+
+    item.innerHTML = '<div class="list-dot" style="background:' + color + '"></div>' +
+      '<div class="list-info"><div class="list-name">' + sec.name + '</div>' +
+      '<div class="list-meta">' + meta + '</div></div>';
+
+    container.appendChild(item);
+  });
+}
+
+function toggleList() {
+  document.getElementById('listPanel').classList.toggle('open');
+}
+
+// =============================================
+// モーダル
+// =============================================
+function openModal(sectionId) {
+  currentSectionId = sectionId;
+  const sec = SECTIONS.find(s => s.id === sectionId);
+  if (!sec) return;
+
+  document.getElementById('modalTitle').textContent = sec.name;
+  document.getElementById('modalArea').textContent = 'エリア: ' + sec.area;
+
+  const data = sectionData[sectionId] || { status: 'not_started', worker: '', memo: '' };
+
+  // ステータスボタン
+  document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.status === data.status);
+  });
+
+  document.getElementById('inputWorker').value = data.worker || '';
+  document.getElementById('inputMemo').value = data.memo || '';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === e.currentTarget) {
+    document.getElementById('modalOverlay').classList.remove('open');
+    currentSectionId = null;
+  }
+}
+
+function selectStatus(btn) {
+  document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// =============================================
+// 保存
+// =============================================
+async function saveSection() {
+  if (!currentSectionId) return;
+
+  const statusBtn = document.querySelector('.status-btn.active');
+  if (!statusBtn) { showToast('ステータスを選択してください'); return; }
+
+  const status = statusBtn.dataset.status;
+  const worker = document.getElementById('inputWorker').value.trim();
+  const memo = document.getElementById('inputMemo').value.trim();
+
+  // ローカル即時反映
+  sectionData[currentSectionId] = {
+    status, worker, memo, updated_at: new Date().toISOString()
+  };
+  updateUI();
+
+  if (!API_URL) {
+    showToast('保存しました（デモモード）');
+    closeModal({ target: document.getElementById('modalOverlay'), currentTarget: document.getElementById('modalOverlay') });
+    return;
+  }
+
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = '保存中...';
+
+  try {
+    const params = new URLSearchParams({
+      action: 'update',
+      section_id: currentSectionId,
+      status, worker, memo
+    });
+    const json = await jsonp(API_URL + '?' + params.toString());
+    if (json.error) throw new Error(json.error);
+
+    showToast('保存しました');
+    document.getElementById('modalOverlay').classList.remove('open');
+    currentSectionId = null;
+  } catch (err) {
+    showToast('保存エラー: ' + err.message);
+    console.error(err);
+  } finally {
+    saveBtn.disabled = false;
     saveBtn.textContent = '保存する';
   }
 }
