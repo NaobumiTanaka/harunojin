@@ -217,6 +217,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
       <button class="status-btn" data-status="completed" onclick="selectStatus(this)">完了</button>
     </div>
     <div class="form-group">
+      <label>整備日</label>
+      <input type="date" id="inputWorkDate">
+    </div>
+    <div class="form-group">
       <label>作業者名</label>
       <input type="text" id="inputWorker" placeholder="名前を入力">
     </div>
@@ -402,7 +406,7 @@ async function loadData() {
     showToast('デモモード: API_URLを設定してください');
     SECTIONS.forEach(sec => {
       sectionData[sec.id] = {
-        status: 'not_started', worker: '', memo: '', updated_at: ''
+        status: 'not_started', worker: '', memo: '', work_date: '', updated_at: ''
       };
     });
     updateUI();
@@ -419,6 +423,7 @@ async function loadData() {
         status: row.status || 'not_started',
         worker: row.worker || '',
         memo: row.memo || '',
+        work_date: row.work_date || '',
         updated_at: row.updated_at || ''
       };
     });
@@ -490,11 +495,11 @@ function buildList() {
     item.onclick = () => { toggleList(); openModal(sec.id); };
 
     let meta = statusText;
-    if (data.worker) meta += ' / ' + data.worker;
-    if (data.updated_at) {
-      const d = new Date(data.updated_at);
-      if (!isNaN(d)) meta += ' / ' + d.toLocaleDateString('ja-JP');
+    if (data.work_date) {
+      const wd = new Date(data.work_date + 'T00:00:00');
+      if (!isNaN(wd)) meta += ' / ' + wd.toLocaleDateString('ja-JP') + '整備';
     }
+    if (data.worker) meta += ' / ' + data.worker;
 
     item.innerHTML = '<div class="list-dot" style="background:' + color + '"></div>' +
       '<div class="list-info"><div class="list-name">' + sec.name + '</div>' +
@@ -519,13 +524,16 @@ function openModal(sectionId) {
   document.getElementById('modalTitle').textContent = sec.name;
   document.getElementById('modalArea').textContent = 'エリア: ' + sec.area;
 
-  const data = sectionData[sectionId] || { status: 'not_started', worker: '', memo: '' };
+  const data = sectionData[sectionId] || { status: 'not_started', worker: '', memo: '', work_date: '' };
 
   // ステータスボタン
   document.querySelectorAll('.status-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.status === data.status);
   });
 
+  // 整備日：既存データがあればそれを、なければ今日の日付をセット
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('inputWorkDate').value = data.work_date || today;
   document.getElementById('inputWorker').value = data.worker || '';
   document.getElementById('inputMemo').value = data.memo || '';
   document.getElementById('modalOverlay').classList.add('open');
@@ -553,12 +561,13 @@ async function saveSection() {
   if (!statusBtn) { showToast('ステータスを選択してください'); return; }
 
   const status = statusBtn.dataset.status;
+  const work_date = document.getElementById('inputWorkDate').value;
   const worker = document.getElementById('inputWorker').value.trim();
   const memo = document.getElementById('inputMemo').value.trim();
 
   // ローカル即時反映
   sectionData[currentSectionId] = {
-    status, worker, memo, updated_at: new Date().toISOString()
+    status, work_date, worker, memo, updated_at: new Date().toISOString()
   };
   updateUI();
 
@@ -576,7 +585,7 @@ async function saveSection() {
     const params = new URLSearchParams({
       action: 'update',
       section_id: currentSectionId,
-      status, worker, memo
+      status, work_date, worker, memo
     });
     const json = await jsonp(API_URL + '?' + params.toString());
     if (json.error) throw new Error(json.error);
