@@ -312,6 +312,7 @@ const API_URL = ''; // ← Google Apps Script のデプロイURL
 // =============================================
 const KML_URL = 'https://www.google.com/maps/d/kml?mid=1PGd6THjqNEnfm1VogxyeYc8sHi548p8&forcekml=1';
 let COURSE_COORDS = [];
+let KML_SIGNS = []; // KMLから読み込んだCourseSignsポイント
 
 async function loadKML() {
   try {
@@ -319,6 +320,8 @@ async function loadKML() {
     const text = await res.text();
     const parser = new DOMParser();
     const doc = parser.parseFromString(text, 'text/xml');
+
+    // コースライン取得
     const lineEl = doc.querySelector('LineString coordinates');
     if (lineEl) {
       COURSE_COORDS = lineEl.textContent.trim().split(/\s+/).map(c => {
@@ -326,6 +329,27 @@ async function loadKML() {
         return [lat, lng];
       });
     }
+
+    // CourseSignsレイヤーのポイント取得
+    const folders = doc.querySelectorAll('Folder');
+    folders.forEach(folder => {
+      const nameEl = folder.querySelector(':scope > name');
+      if (nameEl && nameEl.textContent.trim() === 'CourseSigns') {
+        const placemarks = folder.querySelectorAll('Placemark');
+        placemarks.forEach((pm, idx) => {
+          const pmName = pm.querySelector('name');
+          const coordEl = pm.querySelector('Point coordinates');
+          if (coordEl) {
+            const parts = coordEl.textContent.trim().split(',');
+            const lng = parseFloat(parts[0]);
+            const lat = parseFloat(parts[1]);
+            const name = pmName ? pmName.textContent.trim() : ('Sign' + (idx + 1));
+            KML_SIGNS.push({ name, lat, lng });
+          }
+        });
+        console.log('CourseSigns loaded:', KML_SIGNS.length, 'points');
+      }
+    });
   } catch (e) {
     console.error('KML load error:', e);
     showToast('コースデータの読み込みに失敗しました');
@@ -350,6 +374,35 @@ const STATUS_TEXT = {
   placed: '設置済',
   collected: '回収済'
 };
+
+// 区間定義（草刈りアプリと共通）
+const SECTIONS = [
+  { id:'sec-01', name:'松代城スタート付近', startIdx:0, endIdx:50 },
+  { id:'sec-02', name:'太平への登り', startIdx:51, endIdx:96 },
+  { id:'sec-03', name:'太平〜会沢', startIdx:97, endIdx:130 },
+  { id:'sec-04', name:'会沢 入口', startIdx:131, endIdx:165 },
+  { id:'sec-05', name:'会沢 中央', startIdx:166, endIdx:200 },
+  { id:'sec-06', name:'会沢 奥', startIdx:201, endIdx:240 },
+  { id:'sec-07', name:'会沢〜蓬平 前半', startIdx:241, endIdx:290 },
+  { id:'sec-08', name:'会沢〜蓬平 後半', startIdx:291, endIdx:340 },
+  { id:'sec-09', name:'蓬平周辺', startIdx:341, endIdx:380 },
+  { id:'sec-10', name:'蓬平〜仙納', startIdx:381, endIdx:420 },
+  { id:'sec-11', name:'仙納周辺', startIdx:421, endIdx:453 },
+  { id:'sec-12', name:'田野倉', startIdx:454, endIdx:483 },
+  { id:'sec-13', name:'名平 前半', startIdx:484, endIdx:520 },
+  { id:'sec-14', name:'名平 後半', startIdx:521, endIdx:557 },
+  { id:'sec-15', name:'蒲生 前半', startIdx:558, endIdx:587 },
+  { id:'sec-16', name:'蒲生 後半', startIdx:588, endIdx:622 },
+  { id:'sec-17', name:'池尻 入口', startIdx:623, endIdx:644 },
+  { id:'sec-18', name:'池尻 中央', startIdx:645, endIdx:660 },
+  { id:'sec-19', name:'池尻 奥', startIdx:661, endIdx:688 },
+  { id:'sec-20', name:'千年 前半', startIdx:689, endIdx:705 },
+  { id:'sec-21', name:'千年 後半', startIdx:706, endIdx:720 },
+  { id:'sec-22', name:'千年〜松代城', startIdx:721, endIdx:740 },
+  { id:'sec-23', name:'松代城周辺', startIdx:741, endIdx:759 },
+  { id:'sec-24', name:'能舞台 前半', startIdx:760, endIdx:770 },
+  { id:'sec-25', name:'能舞台〜ゴール', startIdx:771, endIdx:774 }
+];
 
 // 状態
 let map;
@@ -400,11 +453,22 @@ function initMap() {
     maxZoom: 18
   }).addTo(map);
 
-  // コースライン（薄いグレー）
+  // コースライン（区間ごとに表示）
   if (COURSE_COORDS.length > 0) {
-    L.polyline(COURSE_COORDS, {
-      color: '#999', weight: 3, opacity: 0.5, dashArray: '8,6'
-    }).addTo(map);
+    const sectionColors = ['#ef9a9a','#ce93d8','#90caf9','#80cbc4','#a5d6a7',
+      '#fff59d','#ffcc80','#bcaaa4','#b0bec5','#f48fb1',
+      '#b39ddb','#81d4fa','#80deea','#c5e1a5','#e6ee9c',
+      '#ffe082','#ffab91','#d7ccc8','#cfd8dc','#ef9a9a',
+      '#ce93d8','#90caf9','#80cbc4','#a5d6a7','#fff59d'];
+    SECTIONS.forEach((sec, i) => {
+      const coords = COURSE_COORDS.slice(sec.startIdx, sec.endIdx + 1);
+      if (coords.length >= 2) {
+        L.polyline(coords, {
+          color: sectionColors[i % sectionColors.length],
+          weight: 4, opacity: 0.6
+        }).addTo(map).bindTooltip(sec.name, { sticky: true });
+      }
+    });
   }
 
   // エイドステーション
@@ -528,10 +592,37 @@ async function confirmNewPoint() {
 // =============================================
 // データ読み込み
 // =============================================
+// KMLから読み込んだCourseSignsをローカルデータとして展開
+function loadKMLSigns() {
+  KML_SIGNS.forEach((sign, idx) => {
+    const id = 'kml-sign-' + (idx + 1);
+    if (!arrowData[id]) {
+      arrowData[id] = {
+        name: sign.name,
+        lat: sign.lat,
+        lng: sign.lng,
+        status: 'not_placed',
+        worker: '',
+        work_date: '',
+        memo: ''
+      };
+      addMarkerToMap(id, arrowData[id]);
+    }
+  });
+  nextArrowNum = KML_SIGNS.length + 1;
+}
+
 async function loadData() {
   if (!API_URL) {
-    showToast('デモモード: API_URLを設定してください');
+    // APIなし → KMLのCourseSignsを初期データとして使用
+    loadKMLSigns();
     updateUI();
+    if (KML_SIGNS.length > 0) {
+      document.getElementById('lastUpdated').textContent =
+        'KMLから ' + KML_SIGNS.length + ' 箇所読込済（API未接続）';
+    } else {
+      showToast('デモモード: API_URLを設定してください');
+    }
     return;
   }
 
@@ -547,23 +638,40 @@ async function loadData() {
     arrowMarkers = {};
     arrowData = {};
 
-    json.arrows.forEach(row => {
-      const id = row.arrow_id;
-      arrowData[id] = {
-        name: row.name || '',
-        lat: parseFloat(row.lat),
-        lng: parseFloat(row.lng),
-        status: row.status || 'not_placed',
-        worker: row.worker || '',
-        work_date: row.work_date || '',
-        memo: row.memo || ''
-      };
-      addMarkerToMap(id, arrowData[id]);
-    });
+    if (json.arrows && json.arrows.length > 0) {
+      // APIにデータがある場合
+      json.arrows.forEach(row => {
+        const id = row.arrow_id;
+        arrowData[id] = {
+          name: row.name || '',
+          lat: parseFloat(row.lat),
+          lng: parseFloat(row.lng),
+          status: row.status || 'not_placed',
+          worker: row.worker || '',
+          work_date: row.work_date || '',
+          memo: row.memo || ''
+        };
+        addMarkerToMap(id, arrowData[id]);
+      });
+    } else {
+      // APIにデータがない場合 → KMLから初期データを投入
+      loadKMLSigns();
+      // サーバーにも保存
+      for (const id of Object.keys(arrowData)) {
+        const d = arrowData[id];
+        try {
+          const params = new URLSearchParams({
+            action: 'add', arrow_id: id, name: d.name,
+            lat: d.lat.toFixed(6), lng: d.lng.toFixed(6), status: 'not_placed'
+          });
+          await jsonp(API_URL + '?' + params.toString());
+        } catch (e) { console.warn('初期データ保存エラー:', id, e); }
+      }
+    }
 
     // nextArrowNum更新
     const nums = Object.keys(arrowData).map(id => {
-      const m = arrowData[id].name.match(/矢印(\d+)/);
+      const m = id.match(/kml-sign-(\d+)/);
       return m ? parseInt(m[1]) : 0;
     });
     nextArrowNum = nums.length > 0 ? Math.max(...nums) + 1 : 1;
@@ -571,7 +679,10 @@ async function loadData() {
     updateUI();
     document.getElementById('lastUpdated').textContent = '最終更新: ' + new Date().toLocaleString('ja-JP');
   } catch (err) {
-    showToast('読み込みエラー: ' + err.message);
+    // APIエラー時もKMLデータで表示
+    loadKMLSigns();
+    updateUI();
+    showToast('API接続エラー。KMLデータで表示中');
     console.error(err);
   } finally {
     showLoading(false);
