@@ -345,13 +345,12 @@ function initMap() {
     maxZoom: 18
   }).addTo(map);
 
-  // コースライン（薄い灰色で表示）
+  // コースライン（黒の実線）
   if (COURSE_COORDS.length > 0) {
     L.polyline(COURSE_COORDS, {
-      color: '#666',
-      weight: 3,
-      opacity: 0.5,
-      dashArray: '5,5'
+      color: '#000000',
+      weight: 4,
+      opacity: 0.7
     }).addTo(map);
   }
 
