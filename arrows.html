@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Harunojin Trail 矢印誘導管理</title>
+<title>Harunojin Trail 矢印誘導管理 / Arrow Sign Management</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -189,10 +189,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 <!-- Header -->
 <div class="header">
   <div>
-    <h1>Harunojin Trail 矢印誘導管理</h1>
-    <div class="header-sub" id="lastUpdated">読み込み中...</div>
+    <h1>矢印誘導管理 / Arrow Sign Management</h1>
+    <div class="header-sub" id="lastUpdated">読み込み中... / Loading...</div>
   </div>
-  <button class="refresh-btn" onclick="loadData()">↻ 更新</button>
+  <button class="refresh-btn" onclick="loadData()">↻ 更新 / Refresh</button>
 </div>
 
 <!-- Progress bar -->
@@ -204,26 +204,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 <div id="map"></div>
 
 <!-- Add mode banner -->
-<div class="add-banner" id="addBanner">📍 地図をタップして矢印ポイントを追加</div>
+<div class="add-banner" id="addBanner">📍 地図をタップして矢印ポイントを追加 / Tap map to add arrow point</div>
 
 <!-- Stats -->
 <div class="stats-overlay">
-  <div class="stat-item stat-red"><div class="stat-num" id="countNotPlaced">0</div><div class="stat-label">未設置</div></div>
-  <div class="stat-item stat-green"><div class="stat-num" id="countPlaced">0</div><div class="stat-label">設置済</div></div>
-  <div class="stat-item stat-grey"><div class="stat-num" id="countCollected">0</div><div class="stat-label">回収済</div></div>
+  <div class="stat-item stat-red"><div class="stat-num" id="countNotPlaced">0</div><div class="stat-label">未設置<br>Not Placed</div></div>
+  <div class="stat-item stat-green"><div class="stat-num" id="countPlaced">0</div><div class="stat-label">設置済<br>Placed</div></div>
+  <div class="stat-item stat-grey"><div class="stat-num" id="countCollected">0</div><div class="stat-label">回収済<br>Collected</div></div>
 </div>
 
 <!-- Legend -->
 <div class="legend">
-  <div class="legend-section">種類（タップで表示切替）</div>
-  <div class="legend-item" onclick="toggleCategory('arrow')"><div class="legend-color" style="background:#d32f2f;"></div>矢印 (37)</div>
-  <div class="legend-item" onclick="toggleCategory('danger')"><div class="legend-color" style="background:#ff6f00;"></div>注意/危険 (3)</div>
-  <div class="legend-item" onclick="toggleCategory('tape')"><div class="legend-color" style="background:#f9a825;"></div>テープ (4)</div>
-  <div class="legend-item" onclick="toggleCategory('info')"><div class="legend-color" style="background:#6a1b9a;"></div>案内 (5)</div>
-  <div class="legend-section">ステータス</div>
-  <div class="legend-item"><div class="legend-color" style="background:#d32f2f; border: 2px solid #d32f2f;"></div>未設置</div>
-  <div class="legend-item"><div class="legend-color" style="background:#2e7d32; border: 2px solid #2e7d32;"></div>設置済</div>
-  <div class="legend-item"><div class="legend-color" style="background:#9e9e9e; border: 2px solid #9e9e9e;"></div>回収済</div>
+  <div class="legend-section">種類 / Category（タップで切替 / Tap to toggle）</div>
+  <div class="legend-item" onclick="toggleCategory('arrow')"><div class="legend-color" style="background:#d32f2f;"></div>矢印 / Arrow (37)</div>
+  <div class="legend-item" onclick="toggleCategory('danger')"><div class="legend-color" style="background:#ff6f00;"></div>注意/危険 / Danger (3)</div>
+  <div class="legend-item" onclick="toggleCategory('tape')"><div class="legend-color" style="background:#f9a825;"></div>テープ / Tape (4)</div>
+  <div class="legend-item" onclick="toggleCategory('info')"><div class="legend-color" style="background:#6a1b9a;"></div>案内 / Info (5)</div>
+  <div class="legend-section">ステータス / Status</div>
+  <div class="legend-item"><div class="legend-color" style="background:#d32f2f; border: 2px solid #d32f2f;"></div>未設置 / Not Placed</div>
+  <div class="legend-item"><div class="legend-color" style="background:#2e7d32; border: 2px solid #2e7d32;"></div>設置済 / Placed</div>
+  <div class="legend-item"><div class="legend-color" style="background:#9e9e9e; border: 2px solid #9e9e9e;"></div>回収済 / Collected</div>
 </div>
 
 <!-- Add button -->
@@ -235,7 +235,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 <!-- Arrow list panel -->
 <div class="list-panel" id="listPanel">
   <div class="list-panel-header">
-    <h2>矢印一覧</h2>
+    <h2>矢印一覧 / Arrow List</h2>
     <button class="list-close" onclick="toggleList()">✕</button>
   </div>
   <div class="list-content" id="listContent"></div>
@@ -247,24 +247,24 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
     <h3 id="modalTitle"></h3>
     <div class="modal-sub" id="modalSub"></div>
     <div class="status-btns">
-      <button class="status-btn" data-status="not_placed" onclick="selectStatus(this)">未設置</button>
-      <button class="status-btn" data-status="placed" onclick="selectStatus(this)">設置済</button>
-      <button class="status-btn" data-status="collected" onclick="selectStatus(this)">回収済</button>
+      <button class="status-btn" data-status="not_placed" onclick="selectStatus(this)">未設置<br><small>Not Placed</small></button>
+      <button class="status-btn" data-status="placed" onclick="selectStatus(this)">設置済<br><small>Placed</small></button>
+      <button class="status-btn" data-status="collected" onclick="selectStatus(this)">回収済<br><small>Collected</small></button>
     </div>
     <div class="form-group">
-      <label>作業日</label>
+      <label>作業日 / Work Date <span style="color:#d32f2f;">*必須 / Required</span></label>
       <input type="date" id="inputWorkDate">
     </div>
     <div class="form-group">
-      <label>作業者名</label>
-      <input type="text" id="inputWorker" placeholder="名前を入力">
+      <label>作業者名 / Worker Name <span style="color:#d32f2f;">*必須 / Required</span></label>
+      <input type="text" id="inputWorker" placeholder="名前を入力 / Enter name">
     </div>
     <div class="form-group">
-      <label>メモ</label>
-      <textarea id="inputMemo" placeholder="設置場所の詳細など"></textarea>
+      <label>メモ / Notes</label>
+      <textarea id="inputMemo" placeholder="設置場所の詳細など / Details about placement location"></textarea>
     </div>
     <div class="modal-btns">
-      <button class="save-btn" id="saveBtn" onclick="saveArrow()">保存する</button>
+      <button class="save-btn" id="saveBtn" onclick="saveArrow()">保存する / Save</button>
     </div>
   </div>
 </div>
@@ -275,7 +275,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 <!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="loading-spinner"></div>
-  <div style="font-size:13px;color:#666;">読み込み中...</div>
+  <div style="font-size:13px;color:#666;">読み込み中... / Loading...</div>
 </div>
 
 <script>
@@ -389,10 +389,10 @@ const KML_SIGNS = [
 
 // カテゴリ定義
 const CATEGORIES = {
-  arrow:  { label: '矢印',      color: '#d32f2f', icon: '→' },
-  danger: { label: '注意/危険',  color: '#ff6f00', icon: '⚠' },
-  tape:   { label: 'テープ',    color: '#f9a825', icon: '●' },
-  info:   { label: '案内',      color: '#6a1b9a', icon: 'ℹ' }
+  arrow:  { label: '矢印 / Arrow',      color: '#d32f2f', icon: '→' },
+  danger: { label: '注意/危険 / Danger',  color: '#ff6f00', icon: '⚠' },
+  tape:   { label: 'テープ / Tape',      color: '#f9a825', icon: '●' },
+  info:   { label: '案内 / Info',        color: '#6a1b9a', icon: 'ℹ' }
 };
 
 // カテゴリ表示/非表示
@@ -440,7 +440,7 @@ function initMap() {
   // 地図タップ（追加モード）
   map.on('click', function(e) {
     if (!addMode) return;
-    const name = prompt('矢印ポイント名を入力してください:');
+    const name = prompt('矢印ポイント名を入力してください / Enter arrow point name:');
     if (!name) return;
     addArrowPoint(name, e.latlng.lat, e.latlng.lng);
   });
@@ -461,7 +461,7 @@ function jsonp(url) {
     const timeout = setTimeout(() => {
       delete window[cbName];
       if (script.parentNode) script.parentNode.removeChild(script);
-      reject(new Error('タイムアウト'));
+      reject(new Error('タイムアウト / Timeout'));
     }, 15000);
 
     window[cbName] = function(data) {
@@ -476,7 +476,7 @@ function jsonp(url) {
     script.onerror = () => {
       clearTimeout(timeout);
       delete window[cbName];
-      reject(new Error('読み込みエラー'));
+      reject(new Error('読み込みエラー / Load error'));
     };
     document.body.appendChild(script);
   });
@@ -495,7 +495,7 @@ async function loadData() {
   try {
     const data = await jsonp(API_URL);
     if (data.error) {
-      showToast('エラー: ' + data.error);
+      showToast('エラー / Error: ' + data.error);
       return;
     }
 
@@ -524,9 +524,9 @@ async function loadData() {
     updateStats();
     buildList();
     document.getElementById('lastUpdated').textContent =
-      '最終更新: ' + new Date().toLocaleTimeString('ja-JP');
+      '最終更新 / Last updated: ' + new Date().toLocaleTimeString('ja-JP');
   } catch (e) {
-    showToast('通信エラー: ' + e.message);
+    showToast('通信エラー / Connection error: ' + e.message);
   } finally {
     showLoading(false);
   }
@@ -642,7 +642,7 @@ async function addArrowPoint(name, lat, lng) {
         return;
       }
     } catch (e) {
-      showToast('通信エラー: ' + e.message);
+      showToast('通信エラー / Connection error: ' + e.message);
       return;
     }
   }
@@ -653,7 +653,7 @@ async function addArrowPoint(name, lat, lng) {
   addMarker(arrow);
   updateStats();
   buildList();
-  showToast('追加しました: ' + name);
+  showToast('追加しました / Added: ' + name);
 
   // 追加モード解除
   toggleAddMode();
@@ -686,7 +686,7 @@ function buildList() {
   const arrows = Object.values(arrowData);
 
   if (arrows.length === 0) {
-    container.innerHTML = '<div style="padding:20px;text-align:center;color:#999;">矢印ポイントがありません<br>＋ボタンで追加してください</div>';
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:#999;">矢印ポイントがありません / No arrow points<br>＋ボタンで追加してください / Press + to add</div>';
     return;
   }
 
@@ -702,7 +702,7 @@ function buildList() {
     else if (a.status === 'collected') dotColor = '#9e9e9e';
     else dotColor = cat.color;
 
-    const statusLabel = a.status === 'not_placed' ? '未設置' : a.status === 'placed' ? '設置済' : '回収済';
+    const statusLabel = a.status === 'not_placed' ? '未設置 / Not Placed' : a.status === 'placed' ? '設置済 / Placed' : '回収済 / Collected';
     const meta = [cat.label, statusLabel];
     if (a.work_date) meta.push(a.work_date);
     if (a.worker) meta.push(a.worker);
@@ -745,7 +745,7 @@ function openModal(arrowId) {
   const cat = CATEGORIES[arrow.category] || CATEGORIES.arrow;
   document.getElementById('modalTitle').textContent = cat.icon + ' ' + arrow.name;
   document.getElementById('modalSub').textContent =
-    cat.label + ' / 座標: ' + Number(arrow.lat).toFixed(5) + ', ' + Number(arrow.lng).toFixed(5);
+    cat.label + ' / 座標 Coords: ' + Number(arrow.lat).toFixed(5) + ', ' + Number(arrow.lng).toFixed(5);
 
   // ステータスボタン
   document.querySelectorAll('.status-btn').forEach(btn => {
@@ -776,11 +776,15 @@ async function saveArrow() {
   if (!currentArrowId) return;
 
   const status = document.querySelector('.status-btn.active')?.dataset.status;
-  if (!status) { showToast('ステータスを選択してください'); return; }
+  if (!status) { showToast('ステータスを選択してください / Please select a status'); return; }
 
   const work_date = document.getElementById('inputWorkDate').value;
-  const worker = document.getElementById('inputWorker').value;
+  const worker = document.getElementById('inputWorker').value.trim();
   const memo = document.getElementById('inputMemo').value;
+
+  // 必須項目チェック / Required field validation
+  if (!work_date) { showToast('作業日を入力してください / Please enter work date'); return; }
+  if (!worker) { showToast('作業者名を入力してください / Please enter worker name'); return; }
 
   const btn = document.getElementById('saveBtn');
   btn.disabled = true;
@@ -824,7 +828,7 @@ async function saveArrow() {
         return;
       }
     } catch (e) {
-      showToast('通信エラー: ' + e.message);
+      showToast('通信エラー / Connection error: ' + e.message);
       btn.disabled = false;
       return;
     }
@@ -849,7 +853,7 @@ async function saveArrow() {
   updateStats();
   buildList();
   closeModal();
-  showToast(API_URL ? '保存しました' : '保存しました（ローカルのみ）');
+  showToast(API_URL ? '保存しました / Saved' : '保存しました（ローカルのみ） / Saved (local only)');
   btn.disabled = false;
 }
 
@@ -858,7 +862,7 @@ async function saveArrow() {
 // =============================================
 async function deleteArrow() {
   if (!currentArrowId) return;
-  if (!confirm('このポイントを削除しますか？')) return;
+  if (!confirm('このポイントを削除しますか？ / Delete this point?')) return;
 
   // API設定済みならサーバーからも削除
   if (API_URL) {
@@ -870,7 +874,7 @@ async function deleteArrow() {
         return;
       }
     } catch (e) {
-      showToast('通信エラー: ' + e.message);
+      showToast('通信エラー / Connection error: ' + e.message);
       return;
     }
   }
@@ -885,7 +889,7 @@ async function deleteArrow() {
   updateStats();
   buildList();
   closeModal();
-  showToast(API_URL ? '削除しました' : '削除しました（ローカルのみ）');
+  showToast(API_URL ? '削除しました / Deleted' : '削除しました（ローカルのみ） / Deleted (local only)');
 }
 
 // =============================================
