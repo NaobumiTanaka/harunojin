@@ -326,6 +326,59 @@ const ARROW_COLORS = {
   collected: '#9e9e9e'
 };
 
+// KMLから取得した初期矢印ポイント（49箇所）
+const KML_SIGNS = [
+  { name: 'TaiheiArrow1', lat: 37.1438251, lng: 138.6238318 },
+  { name: 'TaiheiArrow2', lat: 37.1460115, lng: 138.6254259 },
+  { name: 'AisawaCarefulSign', lat: 37.1488263, lng: 138.6269233 },
+  { name: 'AisawaGreenPoleTape2', lat: 37.1525205, lng: 138.6235135 },
+  { name: 'AisawaGreenPoleTape1', lat: 37.153149, lng: 138.624404 },
+  { name: 'yabukozakiArrow1', lat: 37.1525043, lng: 138.6194578 },
+  { name: 'YabukozakiArrow2', lat: 37.1534449, lng: 138.6191574 },
+  { name: 'YabukozakiArrow3', lat: 37.1548189, lng: 138.6155949 },
+  { name: 'YabukozakiArrow4', lat: 37.15397, lng: 138.61532 },
+  { name: 'ChitoseArrow3', lat: 37.112625, lng: 138.604422 },
+  { name: 'ChitoseArrow4', lat: 37.1145426, lng: 138.607913 },
+  { name: 'ChitoseArrow5', lat: 37.1210573, lng: 138.6065214 },
+  { name: 'ChitoseArrow6', lat: 37.1207451, lng: 138.6097347 },
+  { name: 'SennoArrow0', lat: 37.1476598, lng: 138.5993455 },
+  { name: 'SennoArrow1', lat: 37.1480242, lng: 138.5988654 },
+  { name: 'SennoArrow2', lat: 37.1528506, lng: 138.5919911 },
+  { name: 'SennoArrow3', lat: 37.1507416, lng: 138.5957337 },
+  { name: 'SennoArrow5', lat: 37.15158, lng: 138.5948704 },
+  { name: 'SennoArrow6', lat: 37.151471, lng: 138.5934668 },
+  { name: 'SennoArrow7', lat: 37.1517885, lng: 138.5895428 },
+  { name: 'SennoArrow8', lat: 37.1506738, lng: 138.5888929 },
+  { name: 'TanokuraArrow1', lat: 37.1495457, lng: 138.585383 },
+  { name: 'TanokuraArrow2', lat: 37.1497563, lng: 138.5857961 },
+  { name: 'TanokuraArrow3', lat: 37.149858, lng: 138.5845701 },
+  { name: 'TanokuraArrow4', lat: 37.1490724, lng: 138.5842548 },
+  { name: 'TanokuraArrow6', lat: 37.1497822, lng: 138.582911 },
+  { name: 'TanokuraArrow7', lat: 37.1503511, lng: 138.5811814 },
+  { name: 'NabiroArrow1', lat: 37.1483488, lng: 138.5801964 },
+  { name: 'NabiroArrow2', lat: 37.1434199, lng: 138.5806111 },
+  { name: 'NabiroArrow4', lat: 37.1428241, lng: 138.5822991 },
+  { name: 'NabiroArrow5', lat: 37.1413178, lng: 138.583139 },
+  { name: 'KamoArrow1', lat: 37.1389573, lng: 138.5817384 },
+  { name: 'KamoArrow2', lat: 37.1360069, lng: 138.578854 },
+  { name: 'KamoArrow3', lat: 37.1357696, lng: 138.5793876 },
+  { name: 'KamoArrow4', lat: 37.1340623, lng: 138.582032 },
+  { name: 'IkejiriArrow2', lat: 37.1268282, lng: 138.5874489 },
+  { name: 'IkejiriArrow1', lat: 37.1276699, lng: 138.5838917 },
+  { name: 'IkejiriGreenPoleTape1', lat: 37.1230193, lng: 138.5888679 },
+  { name: 'IkejiriGreenPoleTape2', lat: 37.1228567, lng: 138.5895224 },
+  { name: 'IkejiriArrow3', lat: 37.1185301, lng: 138.5908849 },
+  { name: 'ChitoseArrow1', lat: 37.1101972, lng: 138.6042953 },
+  { name: 'ChitoseArrow2', lat: 37.1119361, lng: 138.6036486 },
+  { name: 'TanokuraDanger1', lat: 37.1498073, lng: 138.5853464 },
+  { name: 'TanokuraInfo', lat: 37.1497988, lng: 138.5850165 },
+  { name: 'TanokuraDanger2', lat: 37.1497813, lng: 138.5814838 },
+  { name: 'KamoInfo1', lat: 37.1354709, lng: 138.5795188 },
+  { name: 'ChitoseInfo1', lat: 37.112068, lng: 138.6038535 },
+  { name: 'ChitoseInfo2', lat: 37.1210806, lng: 138.6102876 },
+  { name: 'NohbutaiInfo1', lat: 37.1288171, lng: 138.6145576 }
+];
+
 // 状態
 let map;
 let arrowData = {};   // arrow_id -> {name, lat, lng, status, work_date, worker, memo}
@@ -730,10 +783,34 @@ function showLoading(show) {
 }
 
 // =============================================
+// KML初期ポイント読み込み
+// =============================================
+function loadKMLSigns() {
+  KML_SIGNS.forEach((sign, i) => {
+    const arrow_id = 'kml-' + i;
+    const arrow = {
+      arrow_id,
+      name: sign.name,
+      lat: sign.lat,
+      lng: sign.lng,
+      status: 'not_placed',
+      work_date: '',
+      worker: '',
+      memo: ''
+    };
+    arrowData[arrow_id] = arrow;
+    addMarker(arrow);
+  });
+  updateStats();
+  buildList();
+}
+
+// =============================================
 // 初期化
 // =============================================
 document.addEventListener('DOMContentLoaded', () => {
   initMap();
+  loadKMLSigns();
   loadData();
 });
 </script>
