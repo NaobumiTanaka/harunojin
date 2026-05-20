@@ -265,7 +265,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
     </div>
     <div class="modal-btns">
       <button class="save-btn" id="saveBtn" onclick="saveArrow()">保存する</button>
-      <button class="delete-btn" id="deleteBtn" onclick="deleteArrow()">削除</button>
     </div>
   </div>
 </div>
@@ -789,14 +788,37 @@ async function saveArrow() {
   // API設定済みならサーバーに保存
   if (API_URL) {
     try {
-      const url = API_URL + '?action=update&arrow_id=' + encodeURIComponent(currentArrowId)
+      const arrow = arrowData[currentArrowId];
+
+      // まずスプレッドシートに登録されているか確認（updateを試行）
+      let url = API_URL + '?action=update&arrow_id=' + encodeURIComponent(currentArrowId)
         + '&status=' + status
         + '&work_date=' + encodeURIComponent(work_date)
         + '&worker=' + encodeURIComponent(worker)
         + '&memo=' + encodeURIComponent(memo);
-      const result = await jsonp(url);
+      let result = await jsonp(url);
 
-      if (result.error) {
+      // ポイントが見つからない場合は、まずaddしてからupdateする
+      if (result.error && result.error.includes('見つかりません')) {
+        const addUrl = API_URL + '?action=add&arrow_id=' + encodeURIComponent(currentArrowId)
+          + '&name=' + encodeURIComponent(arrow.name)
+          + '&lat=' + arrow.lat + '&lng=' + arrow.lng
+          + '&status=' + status;
+        const addResult = await jsonp(addUrl);
+        if (addResult.error) {
+          showToast('エラー: ' + addResult.error);
+          btn.disabled = false;
+          return;
+        }
+        // add成功後、work_date/worker/memoもupdateで保存
+        if (work_date || worker || memo) {
+          await jsonp(API_URL + '?action=update&arrow_id=' + encodeURIComponent(currentArrowId)
+            + '&status=' + status
+            + '&work_date=' + encodeURIComponent(work_date)
+            + '&worker=' + encodeURIComponent(worker)
+            + '&memo=' + encodeURIComponent(memo));
+        }
+      } else if (result.error) {
         showToast('エラー: ' + result.error);
         btn.disabled = false;
         return;
