@@ -500,14 +500,23 @@ async function loadData() {
       return;
     }
 
-    // 既存マーカー削除
-    Object.values(arrowMarkers).forEach(m => map.removeLayer(m));
-    arrowMarkers = {};
-    arrowData = {};
-
-    // データセット
-    if (data.arrows) {
+    // APIデータをマージ（既存KMLデータは保持）
+    if (data.arrows && data.arrows.length > 0) {
+      // API側にデータがあれば、そのポイントを上書き/追加
       data.arrows.forEach(a => {
+        // 既存マーカーがあれば削除して再描画
+        if (arrowMarkers[a.arrow_id]) {
+          map.removeLayer(arrowMarkers[a.arrow_id]);
+          delete arrowMarkers[a.arrow_id];
+        }
+        // カテゴリが無ければ既存データから引き継ぐか、名前から推定
+        if (!a.category) {
+          if (arrowData[a.arrow_id] && arrowData[a.arrow_id].category) {
+            a.category = arrowData[a.arrow_id].category;
+          } else {
+            a.category = guessCategory(a.name);
+          }
+        }
         arrowData[a.arrow_id] = a;
         addMarker(a);
       });
@@ -869,6 +878,16 @@ function showToast(msg) {
 
 function showLoading(show) {
   document.getElementById('loadingOverlay').classList.toggle('show', show);
+}
+
+// =============================================
+// カテゴリ推定（名前から）
+// =============================================
+function guessCategory(name) {
+  if (/Info/i.test(name)) return 'info';
+  if (/Danger|Careful/i.test(name)) return 'danger';
+  if (/Tape|PoleTape/i.test(name)) return 'tape';
+  return 'arrow';
 }
 
 // =============================================
