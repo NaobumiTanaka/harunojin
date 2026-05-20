@@ -488,7 +488,6 @@ function jsonp(url) {
 // =============================================
 async function loadData() {
   if (!API_URL) {
-    showToast('API URLが設定されていません');
     updateStats();
     return;
   }
@@ -620,36 +619,36 @@ function toggleAddMode() {
 }
 
 async function addArrowPoint(name, lat, lng) {
-  if (!API_URL) {
-    showToast('API URLが設定されていません');
-    return;
-  }
-
   const arrow_id = 'arrow-' + Date.now();
-  try {
-    const url = API_URL + '?action=add&arrow_id=' + encodeURIComponent(arrow_id)
-      + '&name=' + encodeURIComponent(name)
-      + '&lat=' + lat + '&lng=' + lng
-      + '&status=not_placed';
-    const result = await jsonp(url);
-    if (result.error) {
-      showToast('エラー: ' + result.error);
+
+  // API設定済みならサーバーにも追加
+  if (API_URL) {
+    try {
+      const url = API_URL + '?action=add&arrow_id=' + encodeURIComponent(arrow_id)
+        + '&name=' + encodeURIComponent(name)
+        + '&lat=' + lat + '&lng=' + lng
+        + '&status=not_placed';
+      const result = await jsonp(url);
+      if (result.error) {
+        showToast('エラー: ' + result.error);
+        return;
+      }
+    } catch (e) {
+      showToast('通信エラー: ' + e.message);
       return;
     }
-
-    // ローカルに追加
-    const arrow = { arrow_id, name, lat, lng, status: 'not_placed', work_date: '', worker: '', memo: '' };
-    arrowData[arrow_id] = arrow;
-    addMarker(arrow);
-    updateStats();
-    buildList();
-    showToast('追加しました: ' + name);
-
-    // 追加モード解除
-    toggleAddMode();
-  } catch (e) {
-    showToast('通信エラー: ' + e.message);
   }
+
+  // ローカルに追加
+  const arrow = { arrow_id, name, lat, lng, category: 'arrow', status: 'not_placed', work_date: '', worker: '', memo: '' };
+  arrowData[arrow_id] = arrow;
+  addMarker(arrow);
+  updateStats();
+  buildList();
+  showToast('追加しました: ' + name);
+
+  // 追加モード解除
+  toggleAddMode();
 }
 
 // =============================================
@@ -766,7 +765,7 @@ function selectStatus(btn) {
 // 保存
 // =============================================
 async function saveArrow() {
-  if (!currentArrowId || !API_URL) return;
+  if (!currentArrowId) return;
 
   const status = document.querySelector('.status-btn.active')?.dataset.status;
   if (!status) { showToast('ステータスを選択してください'); return; }
@@ -778,76 +777,84 @@ async function saveArrow() {
   const btn = document.getElementById('saveBtn');
   btn.disabled = true;
 
-  try {
-    const url = API_URL + '?action=update&arrow_id=' + encodeURIComponent(currentArrowId)
-      + '&status=' + status
-      + '&work_date=' + encodeURIComponent(work_date)
-      + '&worker=' + encodeURIComponent(worker)
-      + '&memo=' + encodeURIComponent(memo);
-    const result = await jsonp(url);
+  // API設定済みならサーバーに保存
+  if (API_URL) {
+    try {
+      const url = API_URL + '?action=update&arrow_id=' + encodeURIComponent(currentArrowId)
+        + '&status=' + status
+        + '&work_date=' + encodeURIComponent(work_date)
+        + '&worker=' + encodeURIComponent(worker)
+        + '&memo=' + encodeURIComponent(memo);
+      const result = await jsonp(url);
 
-    if (result.error) {
-      showToast('エラー: ' + result.error);
+      if (result.error) {
+        showToast('エラー: ' + result.error);
+        btn.disabled = false;
+        return;
+      }
+    } catch (e) {
+      showToast('通信エラー: ' + e.message);
+      btn.disabled = false;
       return;
     }
-
-    // ローカル更新
-    arrowData[currentArrowId].status = status;
-    arrowData[currentArrowId].work_date = work_date;
-    arrowData[currentArrowId].worker = worker;
-    arrowData[currentArrowId].memo = memo;
-
-    // マーカー色更新
-    if (arrowMarkers[currentArrowId]) {
-      const catDef = CATEGORIES[arrowData[currentArrowId].category] || CATEGORIES.arrow;
-      let newColor;
-      if (status === 'placed') newColor = '#1565c0';
-      else if (status === 'collected') newColor = '#9e9e9e';
-      else newColor = catDef.color;
-      arrowMarkers[currentArrowId].setStyle({ fillColor: newColor });
-    }
-
-    updateStats();
-    buildList();
-    closeModal();
-    showToast('保存しました');
-  } catch (e) {
-    showToast('通信エラー: ' + e.message);
-  } finally {
-    btn.disabled = false;
   }
+
+  // ローカル更新（API有無にかかわらず実行）
+  arrowData[currentArrowId].status = status;
+  arrowData[currentArrowId].work_date = work_date;
+  arrowData[currentArrowId].worker = worker;
+  arrowData[currentArrowId].memo = memo;
+
+  // マーカー色更新
+  if (arrowMarkers[currentArrowId]) {
+    const catDef = CATEGORIES[arrowData[currentArrowId].category] || CATEGORIES.arrow;
+    let newColor;
+    if (status === 'placed') newColor = '#1565c0';
+    else if (status === 'collected') newColor = '#9e9e9e';
+    else newColor = catDef.color;
+    arrowMarkers[currentArrowId].setStyle({ fillColor: newColor });
+  }
+
+  updateStats();
+  buildList();
+  closeModal();
+  showToast(API_URL ? '保存しました' : '保存しました（ローカルのみ）');
+  btn.disabled = false;
 }
 
 // =============================================
 // 削除
 // =============================================
 async function deleteArrow() {
-  if (!currentArrowId || !API_URL) return;
+  if (!currentArrowId) return;
   if (!confirm('このポイントを削除しますか？')) return;
 
-  try {
-    const url = API_URL + '?action=delete&arrow_id=' + encodeURIComponent(currentArrowId);
-    const result = await jsonp(url);
-
-    if (result.error) {
-      showToast('エラー: ' + result.error);
+  // API設定済みならサーバーからも削除
+  if (API_URL) {
+    try {
+      const url = API_URL + '?action=delete&arrow_id=' + encodeURIComponent(currentArrowId);
+      const result = await jsonp(url);
+      if (result.error) {
+        showToast('エラー: ' + result.error);
+        return;
+      }
+    } catch (e) {
+      showToast('通信エラー: ' + e.message);
       return;
     }
-
-    // ローカル削除
-    if (arrowMarkers[currentArrowId]) {
-      map.removeLayer(arrowMarkers[currentArrowId]);
-      delete arrowMarkers[currentArrowId];
-    }
-    delete arrowData[currentArrowId];
-
-    updateStats();
-    buildList();
-    closeModal();
-    showToast('削除しました');
-  } catch (e) {
-    showToast('通信エラー: ' + e.message);
   }
+
+  // ローカル削除
+  if (arrowMarkers[currentArrowId]) {
+    map.removeLayer(arrowMarkers[currentArrowId]);
+    delete arrowMarkers[currentArrowId];
+  }
+  delete arrowData[currentArrowId];
+
+  updateStats();
+  buildList();
+  closeModal();
+  showToast(API_URL ? '削除しました' : '削除しました（ローカルのみ）');
 }
 
 // =============================================
