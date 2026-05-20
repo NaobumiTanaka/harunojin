@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Harunojin 矢印誘導管理</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f5f5f5; }
+
+/* Header */
+.header {
+  background: #1565c0; color: white; padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.header h1 { font-size: 15px; font-weight: 700; }
+.header-sub { font-size: 11px; opacity: 0.8; }
+.header-btns { display: flex; gap: 6px; }
+.header-btn {
+  background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.4);
+  color: white; padding: 6px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+}
+.header-btn:active { background: rgba(255,255,255,0.3); }
+.header-btn.add-mode { background: #ff9800; border-color: #ff9800; }
+
+/* Progress bar */
+.progress-bar {
+  position: fixed; top: 52px; left: 0; right: 0; z-index: 999;
+  background: #e0e0e0; height: 6px;
+}
+.progress-fill { height: 100%; transition: width 0.5s ease; }
+
+/* Map */
+#map { position: fixed; top: 58px; left: 0; right: 0; bottom: 0; z-index: 1; }
+
+/* Add mode banner */
+.add-banner {
+  position: fixed; top: 58px; left: 0; right: 0; z-index: 998;
+  background: #ff9800; color: white; text-align: center; padding: 8px;
+  font-size: 13px; font-weight: 600; display: none;
+}
+.add-banner.show { display: block; }
+
+/* Stats overlay */
+.stats-overlay {
+  position: fixed; bottom: 16px; left: 16px; z-index: 900;
+  background: white; border-radius: 12px; padding: 12px 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15); font-size: 13px;
+  display: flex; gap: 16px;
+}
+.stat-item { text-align: center; }
+.stat-num { font-size: 20px; font-weight: 700; }
+.stat-label { font-size: 10px; color: #666; margin-top: 2px; }
+.stat-red .stat-num { color: #d32f2f; }
+.stat-blue .stat-num { color: #1565c0; }
+.stat-grey .stat-num { color: #757575; }
+
+/* List toggle */
+.list-toggle {
+  position: fixed; bottom: 16px; right: 16px; z-index: 900;
+  background: #1565c0; color: white; border: none;
+  width: 48px; height: 48px; border-radius: 50%;
+  font-size: 20px; cursor: pointer;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Section list panel */
+.list-panel {
+  position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px;
+  height: 100%; background: white; z-index: 2000;
+  transition: right 0.3s ease;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+  display: flex; flex-direction: column;
+}
+.list-panel.open { right: 0; }
+.list-panel-header {
+  background: #1565c0; color: white; padding: 14px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.list-panel-header h2 { font-size: 16px; }
+.list-close {
+  background: none; border: none; color: white;
+  font-size: 24px; cursor: pointer; padding: 4px;
+}
+.list-content { flex: 1; overflow-y: auto; padding: 8px; }
+.list-item {
+  display: flex; align-items: center; padding: 10px 8px;
+  gap: 10px; border-bottom: 1px solid #f0f0f0; cursor: pointer;
+}
+.list-item:active { background: #f5f5f5; }
+.list-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.list-info { flex: 1; }
+.list-name { font-size: 13px; font-weight: 600; }
+.list-meta { font-size: 11px; color: #888; margin-top: 2px; }
+
+/* Legend */
+.legend {
+  position: fixed; bottom: 16px; right: 70px; z-index: 900;
+  background: white; border-radius: 8px; padding: 8px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 11px;
+}
+.legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+.legend-color { width: 10px; height: 10px; border-radius: 50%; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 3000; display: none; align-items: flex-end; justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: white; border-radius: 16px 16px 0 0;
+  padding: 20px; width: 100%; max-width: 480px;
+  max-height: 80vh; overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal h3 { font-size: 16px; margin-bottom: 4px; }
+.modal-area { font-size: 12px; color: #888; margin-bottom: 16px; }
+.status-btns { display: flex; gap: 8px; margin-bottom: 16px; }
+.status-btn {
+  flex: 1; padding: 10px 8px; border: 2px solid #ddd; border-radius: 8px;
+  background: white; cursor: pointer; text-align: center;
+  font-size: 12px; font-weight: 600; transition: all 0.2s;
+}
+.status-btn[data-status="not_placed"] { color: #d32f2f; }
+.status-btn[data-status="placed"] { color: #1565c0; }
+.status-btn[data-status="collected"] { color: #757575; }
+.status-btn.active { transform: scale(1.05); }
+.status-btn.active[data-status="not_placed"] { background: #ffebee; border-color: #d32f2f; }
+.status-btn.active[data-status="placed"] { background: #e3f2fd; border-color: #1565c0; }
+.status-btn.active[data-status="collected"] { background: #f5f5f5; border-color: #757575; }
+.form-group { margin-bottom: 12px; }
+.form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+.form-group input, .form-group textarea {
+  width: 100%; padding: 10px; border: 1px solid #ddd;
+  border-radius: 8px; font-size: 14px; font-family: inherit;
+}
+.form-group textarea { height: 60px; resize: none; }
+.modal-btns { display: flex; gap: 8px; margin-top: 8px; }
+.save-btn {
+  flex: 1; padding: 14px; background: #1565c0; color: white;
+  border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer;
+}
+.save-btn:disabled { opacity: 0.5; }
+.delete-btn {
+  padding: 14px 18px; background: white; color: #d32f2f;
+  border: 2px solid #d32f2f; border-radius: 10px; font-size: 13px;
+  font-weight: 600; cursor: pointer;
+}
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+  background: #333; color: white; padding: 10px 20px; border-radius: 8px;
+  font-size: 13px; z-index: 5000; opacity: 0;
+  transition: opacity 0.3s; pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* Loading */
+.loading-overlay {
+  position: fixed; inset: 0; background: rgba(255,255,255,0.9);
+  z-index: 4000; display: none; align-items: center;
+  justify-content: center; flex-direction: column; gap: 12px;
+}
+.loading-overlay.show { display: flex; }
+.loading-spinner {
+  width: 36px; height: 36px; border: 3px solid #e0e0e0;
+  border-top-color: #1565c0; border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Name input dialog */
+.name-dialog {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 3500; display: none; align-items: center; justify-content: center;
+}
+.name-dialog.open { display: flex; }
+.name-dialog-box {
+  background: white; border-radius: 12px; padding: 20px; width: 90%; max-width: 320px;
+}
+.name-dialog-box h3 { font-size: 15px; margin-bottom: 12px; }
+.name-dialog-box input {
+  width: 100%; padding: 10px; border: 1px solid #ddd;
+  border-radius: 8px; font-size: 14px; margin-bottom: 12px;
+}
+.name-dialog-btns { display: flex; gap: 8px; }
+.name-dialog-btns button {
+  flex: 1; padding: 10px; border-radius: 8px; font-size: 14px;
+  font-weight: 600; cursor: pointer;
+}
+.name-cancel { background: #f5f5f5; border: 1px solid #ddd; color: #333; }
+.name-ok { background: #1565c0; border: none; color: white; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <h1>Harunojin 矢印誘導管理</h1>
+    <div class="header-sub" id="lastUpdated">読み込み中...</div>
+  </div>
+  <div class="header-btns">
+    <button class="header-btn" id="addBtn" onclick="toggleAddMode()">+ 追加</button>
+    <button class="header-btn" onclick="loadData()">↻ 更新</button>
+  </div>
+</div>
+
+<!-- Progress bar -->
+<div class="progress-bar">
+  <div class="progress-fill" id="progressFill" style="width:0%; background: linear-gradient(90deg, #1565c0, #42a5f5);"></div>
+</div>
+
+<!-- Add mode banner -->
+<div class="add-banner" id="addBanner">地図をタップして矢印設置箇所を追加してください</div>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- Stats -->
+<div class="stats-overlay">
+  <div class="stat-item stat-red"><div class="stat-num" id="countNotPlaced">0</div><div class="stat-label">未設置</div></div>
+  <div class="stat-item stat-blue"><div class="stat-num" id="countPlaced">0</div><div class="stat-label">設置済</div></div>
+  <div class="stat-item stat-grey"><div class="stat-num" id="countCollected">0</div><div class="stat-label">回収済</div></div>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-color" style="background:#d32f2f;"></div>未設置</div>
+  <div class="legend-item"><div class="legend-color" style="background:#1565c0;"></div>設置済</div>
+  <div class="legend-item"><div class="legend-color" style="background:#757575;"></div>回収済</div>
+</div>
+
+<!-- List toggle -->
+<button class="list-toggle" onclick="toggleList()">☰</button>
+
+<!-- List panel -->
+<div class="list-panel" id="listPanel">
+  <div class="list-panel-header">
+    <h2>矢印一覧</h2>
+    <button class="list-close" onclick="toggleList()">✕</button>
+  </div>
+  <div class="list-content" id="listContent"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3 id="modalTitle"></h3>
+    <div class="modal-area" id="modalArea"></div>
+    <div class="status-btns">
+      <button class="status-btn" data-status="not_placed" onclick="selectStatus(this)">未設置</button>
+      <button class="status-btn" data-status="placed" onclick="selectStatus(this)">設置済</button>
+      <button class="status-btn" data-status="collected" onclick="selectStatus(this)">回収済</button>
+    </div>
+    <div class="form-group">
+      <label>設置日</label>
+      <input type="date" id="inputDate">
+    </div>
+    <div class="form-group">
+      <label>設置者</label>
+      <input type="text" id="inputWorker" placeholder="名前を入力">
+    </div>
+    <div class="form-group">
+      <label>メモ</label>
+      <textarea id="inputMemo" placeholder="設置場所の目印や注意点など"></textarea>
+    </div>
+    <div class="modal-btns">
+      <button class="delete-btn" id="deleteBtn" onclick="deleteArrow()">削除</button>
+      <button class="save-btn" id="saveBtn" onclick="saveArrow()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Name dialog (for new points) -->
+<div class="name-dialog" id="nameDialog">
+  <div class="name-dialog-box">
+    <h3>矢印ポイント名を入力</h3>
+    <input type="text" id="newPointName" placeholder="例: 分岐点A、交差点手前">
+    <div class="name-dialog-btns">
+      <button class="name-cancel" onclick="cancelNewPoint()">キャンセル</button>
+      <button class="name-ok" onclick="confirmNewPoint()">追加</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div style="font-size:13px;color:#666;">読み込み中...</div>
+</div>
+
+<script>
+// =============================================
+// 設定
+// =============================================
+const API_URL = ''; // ← Google Apps Script のデプロイURL
+
+// =============================================
+// コース座標データ — KMLから取得
+// =============================================
+const KML_URL = 'https://www.google.com/maps/d/kml?mid=1PGd6THjqNEnfm1VogxyeYc8sHi548p8&forcekml=1';
+let COURSE_COORDS = [];
+
+async function loadKML() {
+  try {
+    const res = await fetch(KML_URL);
+    const text = await res.text();
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(text, 'text/xml');
+    const lineEl = doc.querySelector('LineString coordinates');
+    if (lineEl) {
+      COURSE_COORDS = lineEl.textContent.trim().split(/\s+/).map(c => {
+        const [lng, lat] = c.split(',').map(Number);
+        return [lat, lng];
+      });
+    }
+  } catch (e) {
+    console.error('KML load error:', e);
+    showToast('コースデータの読み込みに失敗しました');
+  }
+}
+
+// エイドステーション
+const AID_STATIONS = [
+  { name: 'Aidstation1', lat: 37.1481, lng: 138.6101 },
+  { name: 'Aidstation2', lat: 37.1378, lng: 138.5793 },
+  { name: 'Aidstation3', lat: 37.1179, lng: 138.5919 }
+];
+
+// ステータス
+const STATUS_COLORS = {
+  not_placed: '#d32f2f',
+  placed: '#1565c0',
+  collected: '#757575'
+};
+const STATUS_TEXT = {
+  not_placed: '未設置',
+  placed: '設置済',
+  collected: '回収済'
+};
+
+// 状態
+let map;
+let arrowData = {};    // arrow_id -> { name, lat, lng, status, worker, work_date, memo }
+let arrowMarkers = {}; // arrow_id -> L.marker
+let currentArrowId = null;
+let isAddMode = false;
+let pendingLatLng = null;
+let nextArrowNum = 1;
+
+// =============================================
+// JSONP通信ヘルパー
+// =============================================
+function jsonp(url) {
+  return new Promise((resolve, reject) => {
+    const cbName = '_jsonp_cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const timeout = setTimeout(() => {
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      reject(new Error('タイムアウト'));
+    }, 15000);
+    window[cbName] = function(data) {
+      clearTimeout(timeout);
+      delete window[cbName];
+      if (script.parentNode) script.parentNode.removeChild(script);
+      resolve(data);
+    };
+    const sep = url.includes('?') ? '&' : '?';
+    const script = document.createElement('script');
+    script.src = url + sep + 'callback=' + cbName;
+    script.onerror = () => {
+      clearTimeout(timeout);
+      delete window[cbName];
+      reject(new Error('通信エラー'));
+    };
+    document.body.appendChild(script);
+  });
+}
+
+// =============================================
+// 地図初期化
+// =============================================
+function initMap() {
+  map = L.map('map', { zoomControl: true });
+
+  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
+    attribution: '<a href="https://maps.gsi.go.jp/" target="_blank">地理院タイル</a>',
+    maxZoom: 18
+  }).addTo(map);
+
+  // コースライン（薄いグレー）
+  if (COURSE_COORDS.length > 0) {
+    L.polyline(COURSE_COORDS, {
+      color: '#999', weight: 3, opacity: 0.5, dashArray: '8,6'
+    }).addTo(map);
+  }
+
+  // エイドステーション
+  AID_STATIONS.forEach(as => {
+    L.marker([as.lat, as.lng], {
+      icon: L.divIcon({
+        className: '',
+        html: '<div style="background:#ff9800;color:white;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);">⛽ ' + as.name + '</div>',
+        iconSize: null
+      })
+    }).addTo(map);
+  });
+
+  // 全体表示
+  if (COURSE_COORDS.length > 0) {
+    map.fitBounds(L.latLngBounds(COURSE_COORDS), { padding: [30, 30] });
+  } else {
+    map.setView([37.13, 138.60], 13);
+  }
+
+  // 地図クリック → ポイント追加
+  map.on('click', function(e) {
+    if (!isAddMode) return;
+    pendingLatLng = e.latlng;
+    document.getElementById('newPointName').value = '矢印' + nextArrowNum;
+    document.getElementById('nameDialog').classList.add('open');
+  });
+}
+
+// =============================================
+// マーカー作成
+// =============================================
+function createArrowIcon(status) {
+  const color = STATUS_COLORS[status] || STATUS_COLORS.not_placed;
+  return L.divIcon({
+    className: '',
+    html: '<div style="width:24px;height:24px;background:' + color + ';border:2px solid white;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;color:white;font-size:12px;font-weight:700;">→</div>',
+    iconSize: [24, 24],
+    iconAnchor: [12, 12]
+  });
+}
+
+function addMarkerToMap(id, data) {
+  if (arrowMarkers[id]) {
+    map.removeLayer(arrowMarkers[id]);
+  }
+  const marker = L.marker([data.lat, data.lng], {
+    icon: createArrowIcon(data.status)
+  }).addTo(map);
+  marker.on('click', () => openModal(id));
+
+  // ツールチップ
+  marker.bindTooltip(data.name, {
+    permanent: false, direction: 'top', offset: [0, -14]
+  });
+
+  arrowMarkers[id] = marker;
+}
+
+// =============================================
+// 追加モード
+// =============================================
+function toggleAddMode() {
+  isAddMode = !isAddMode;
+  document.getElementById('addBtn').classList.toggle('add-mode', isAddMode);
+  document.getElementById('addBanner').classList.toggle('show', isAddMode);
+  document.getElementById('addBtn').textContent = isAddMode ? '✕ 取消' : '+ 追加';
+}
+
+function cancelNewPoint() {
+  pendingLatLng = null;
+  document.getElementById('nameDialog').classList.remove('open');
+}
+
+async function confirmNewPoint() {
+  const name = document.getElementById('newPointName').value.trim();
+  if (!name) { showToast('名前を入力してください'); return; }
+
+  document.getElementById('nameDialog').classList.remove('open');
+
+  const id = 'arrow-' + Date.now();
+  const newArrow = {
+    name: name,
+    lat: pendingLatLng.lat,
+    lng: pendingLatLng.lng,
+    status: 'not_placed',
+    worker: '',
+    work_date: '',
+    memo: ''
+  };
+
+  // ローカルに追加
+  arrowData[id] = newArrow;
+  addMarkerToMap(id, newArrow);
+  updateUI();
+
+  // サーバーに保存
+  if (API_URL) {
+    try {
+      const params = new URLSearchParams({
+        action: 'add',
+        arrow_id: id,
+        name: name,
+        lat: pendingLatLng.lat.toFixed(6),
+        lng: pendingLatLng.lng.toFixed(6),
+        status: 'not_placed'
+      });
+      await jsonp(API_URL + '?' + params.toString());
+    } catch (err) {
+      showToast('サーバー保存エラー: ' + err.message);
+    }
+  }
+
+  showToast(name + ' を追加しました');
+  pendingLatLng = null;
+  nextArrowNum++;
+
+  // 追加モード継続
+}
+
+// =============================================
+// データ読み込み
+// =============================================
+async function loadData() {
+  if (!API_URL) {
+    showToast('デモモード: API_URLを設定してください');
+    updateUI();
+    return;
+  }
+
+  showLoading(true);
+  try {
+    const json = await jsonp(API_URL);
+    if (json.error) throw new Error(json.error);
+
+    // 既存マーカーをクリア
+    Object.keys(arrowMarkers).forEach(id => {
+      map.removeLayer(arrowMarkers[id]);
+    });
+    arrowMarkers = {};
+    arrowData = {};
+
+    json.arrows.forEach(row => {
+      const id = row.arrow_id;
+      arrowData[id] = {
+        name: row.name || '',
+        lat: parseFloat(row.lat),
+        lng: parseFloat(row.lng),
+        status: row.status || 'not_placed',
+        worker: row.worker || '',
+        work_date: row.work_date || '',
+        memo: row.memo || ''
+      };
+      addMarkerToMap(id, arrowData[id]);
+    });
+
+    // nextArrowNum更新
+    const nums = Object.keys(arrowData).map(id => {
+      const m = arrowData[id].name.match(/矢印(\d+)/);
+      return m ? parseInt(m[1]) : 0;
+    });
+    nextArrowNum = nums.length > 0 ? Math.max(...nums) + 1 : 1;
+
+    updateUI();
+    document.getElementById('lastUpdated').textContent = '最終更新: ' + new Date().toLocaleString('ja-JP');
+  } catch (err) {
+    showToast('読み込みエラー: ' + err.message);
+    console.error(err);
+  } finally {
+    showLoading(false);
+  }
+}
+
+// =============================================
+// UI更新
+// =============================================
+function updateUI() {
+  let counts = { not_placed: 0, placed: 0, collected: 0 };
+
+  Object.keys(arrowData).forEach(id => {
+    const data = arrowData[id];
+    counts[data.status] = (counts[data.status] || 0) + 1;
+  });
+
+  document.getElementById('countNotPlaced').textContent = counts.not_placed;
+  document.getElementById('countPlaced').textContent = counts.placed;
+  document.getElementById('countCollected').textContent = counts.collected;
+
+  const total = Object.keys(arrowData).length;
+  const pct = total > 0 ? Math.round((counts.placed / total) * 100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  buildList();
+}
+
+// =============================================
+// リスト
+// =============================================
+function buildList() {
+  const container = document.getElementById('listContent');
+  container.innerHTML = '';
+
+  const sorted = Object.keys(arrowData).sort((a, b) => {
+    const na = arrowData[a].name;
+    const nb = arrowData[b].name;
+    return na.localeCompare(nb, 'ja');
+  });
+
+  sorted.forEach(id => {
+    const data = arrowData[id];
+    const color = STATUS_COLORS[data.status];
+    const statusText = STATUS_TEXT[data.status] || '未設置';
+
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.onclick = () => { toggleList(); openModal(id); map.setView([data.lat, data.lng], 16); };
+
+    let meta = statusText;
+    if (data.work_date) {
+      const wd = new Date(data.work_date + 'T00:00:00');
+      if (!isNaN(wd)) meta += ' / ' + wd.toLocaleDateString('ja-JP');
+    }
+    if (data.worker) meta += ' / ' + data.worker;
+
+    item.innerHTML = '<div class="list-dot" style="background:' + color + '"></div>' +
+      '<div class="list-info"><div class="list-name">' + data.name + '</div>' +
+      '<div class="list-meta">' + meta + '</div></div>';
+
+    container.appendChild(item);
+  });
+
+  if (sorted.length === 0) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:#999;font-size:13px;">矢印ポイントがありません。<br>「+ 追加」ボタンで地図をタップして追加してください。</div>';
+  }
+}
+
+function toggleList() {
+  document.getElementById('listPanel').classList.toggle('open');
+}
+
+// =============================================
+// モーダル
+// =============================================
+function openModal(arrowId) {
+  currentArrowId = arrowId;
+  const data = arrowData[arrowId];
+  if (!data) return;
+
+  document.getElementById('modalTitle').textContent = data.name;
+  document.getElementById('modalArea').textContent =
+    '位置: ' + data.lat.toFixed(5) + ', ' + data.lng.toFixed(5);
+
+  document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.status === data.status);
+  });
+
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('inputDate').value = data.work_date || today;
+  document.getElementById('inputWorker').value = data.worker || '';
+  document.getElementById('inputMemo').value = data.memo || '';
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === e.currentTarget) {
+    document.getElementById('modalOverlay').classList.remove('open');
+    currentArrowId = null;
+  }
+}
+
+function selectStatus(btn) {
+  document.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// =============================================
+// 保存
+// =============================================
+async function saveArrow() {
+  if (!currentArrowId) return;
+
+  const statusBtn = document.querySelector('.status-btn.active');
+  if (!statusBtn) { showToast('ステータスを選択してください'); return; }
+
+  const status = statusBtn.dataset.status;
+  const work_date = document.getElementById('inputDate').value;
+  const worker = document.getElementById('inputWorker').value.trim();
+  const memo = document.getElementById('inputMemo').value.trim();
+
+  // ローカル更新
+  arrowData[currentArrowId].status = status;
+  arrowData[currentArrowId].work_date = work_date;
+  arrowData[currentArrowId].worker = worker;
+  arrowData[currentArrowId].memo = memo;
+
+  // マーカー色更新
+  addMarkerToMap(currentArrowId, arrowData[currentArrowId]);
+  updateUI();
+
+  if (!API_URL) {
+    showToast('保存しました（デモモード）');
+    document.getElementById('modalOverlay').classList.remove('open');
+    currentArrowId = null;
+    return;
+  }
+
+  const saveBtn = document.getElementById('saveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = '保存中...';
+
+  try {
+    const params = new URLSearchParams({
+      action: 'update',
+      arrow_id: currentArrowId,
+      status, work_date, worker, memo
+    });
+    const json = await jsonp(API_URL + '?' + params.toString());
+    if (json.error) throw new Error(json.error);
+
+    showToast('保存しました');
+    document.getElementById('modalOverlay').classList.remove('open');
+    currentArrowId = null;
+  } catch (err) {
+    showToast('保存エラー: ' + err.message);
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = '保存する';
+  }
+}
+
+// =============================================
+// 削除
+// =============================================
+async function deleteArrow() {
+  if (!currentArrowId) return;
+  const name = arrowData[currentArrowId].name;
+  if (!confirm(name + ' を削除しますか？')) return;
+
+  if (API_URL) {
+    try {
+      const params = new URLSearchParams({
+        action: 'delete',
+        arrow_id: currentArrowId
+      });
+      await jsonp(API_URL + '?' + params.toString());
+    } catch (err) {
+      showToast('削除エラー: ' + err.message);
+      return;
+    }
+  }
+
+  // ローカル削除
+  if (arrowMarkers[currentArrowId]) {
+    map.removeLayer(arrowMarkers[currentArrowId]);
+    delete arrowMarkers[currentArrowId];
+  }
+  delete arrowData[currentArrowId];
+
+  document.getElementById('modalOverlay').classList.remove('open');
+  currentArrowId = null;
+  updateUI();
+  showToast(name + ' を削除しました');
+}
+
+// =============================================
+// ユーティリティ
+// =============================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function showLoading(show) {
+  document.getElementById('loadingOverlay').classList.toggle('show', show);
+}
+
+// =============================================
+// 初期化
+// =============================================
+document.addEventListener('DOMContentLoaded', async () => {
+  showLoading(true);
+  await loadKML();
+  initMap();
+  await loadData();
+  showLoading(false);
+});
+</script>
+</body>
+</html>
