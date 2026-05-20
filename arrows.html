@@ -46,7 +46,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 .stat-num { font-size: 20px; font-weight: 700; }
 .stat-label { font-size: 10px; color: #666; margin-top: 2px; }
 .stat-red .stat-num { color: #d32f2f; }
-.stat-blue .stat-num { color: #1565c0; }
+.stat-green .stat-num { color: #2e7d32; }
 .stat-grey .stat-num { color: #9e9e9e; }
 
 /* List toggle */
@@ -116,11 +116,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
   transition: all 0.2s;
 }
 .status-btn[data-status="not_placed"] { color: #d32f2f; }
-.status-btn[data-status="placed"] { color: #1565c0; }
+.status-btn[data-status="placed"] { color: #2e7d32; }
 .status-btn[data-status="collected"] { color: #9e9e9e; }
 .status-btn.active { transform: scale(1.05); }
 .status-btn.active[data-status="not_placed"] { background: #ffebee; border-color: #d32f2f; }
-.status-btn.active[data-status="placed"] { background: #e3f2fd; border-color: #1565c0; }
+.status-btn.active[data-status="placed"] { background: #e8f5e9; border-color: #2e7d32; }
 .status-btn.active[data-status="collected"] { background: #f5f5f5; border-color: #9e9e9e; }
 .form-group { margin-bottom: 12px; }
 .form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
@@ -209,7 +209,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 <!-- Stats -->
 <div class="stats-overlay">
   <div class="stat-item stat-red"><div class="stat-num" id="countNotPlaced">0</div><div class="stat-label">未設置</div></div>
-  <div class="stat-item stat-blue"><div class="stat-num" id="countPlaced">0</div><div class="stat-label">設置済</div></div>
+  <div class="stat-item stat-green"><div class="stat-num" id="countPlaced">0</div><div class="stat-label">設置済</div></div>
   <div class="stat-item stat-grey"><div class="stat-num" id="countCollected">0</div><div class="stat-label">回収済</div></div>
 </div>
 
@@ -218,11 +218,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
   <div class="legend-section">種類（タップで表示切替）</div>
   <div class="legend-item" onclick="toggleCategory('arrow')"><div class="legend-color" style="background:#d32f2f;"></div>矢印 (37)</div>
   <div class="legend-item" onclick="toggleCategory('danger')"><div class="legend-color" style="background:#ff6f00;"></div>注意/危険 (3)</div>
-  <div class="legend-item" onclick="toggleCategory('tape')"><div class="legend-color" style="background:#2e7d32;"></div>テープ (4)</div>
+  <div class="legend-item" onclick="toggleCategory('tape')"><div class="legend-color" style="background:#f9a825;"></div>テープ (4)</div>
   <div class="legend-item" onclick="toggleCategory('info')"><div class="legend-color" style="background:#6a1b9a;"></div>案内 (5)</div>
   <div class="legend-section">ステータス</div>
   <div class="legend-item"><div class="legend-color" style="background:#d32f2f; border: 2px solid #d32f2f;"></div>未設置</div>
-  <div class="legend-item"><div class="legend-color" style="background:#1565c0; border: 2px solid #1565c0;"></div>設置済</div>
+  <div class="legend-item"><div class="legend-color" style="background:#2e7d32; border: 2px solid #2e7d32;"></div>設置済</div>
   <div class="legend-item"><div class="legend-color" style="background:#9e9e9e; border: 2px solid #9e9e9e;"></div>回収済</div>
 </div>
 
@@ -331,7 +331,7 @@ const AID_STATIONS = [
 // ステータス色
 const ARROW_COLORS = {
   not_placed: '#d32f2f',
-  placed: '#1565c0',
+  placed: '#2e7d32',
   collected: '#9e9e9e'
 };
 
@@ -392,7 +392,7 @@ const KML_SIGNS = [
 const CATEGORIES = {
   arrow:  { label: '矢印',      color: '#d32f2f', icon: '→' },
   danger: { label: '注意/危険',  color: '#ff6f00', icon: '⚠' },
-  tape:   { label: 'テープ',    color: '#2e7d32', icon: '●' },
+  tape:   { label: 'テープ',    color: '#f9a825', icon: '●' },
   info:   { label: '案内',      color: '#6a1b9a', icon: 'ℹ' }
 };
 
@@ -531,7 +531,7 @@ function addMarker(arrow) {
   const cat = CATEGORIES[arrow.category] || CATEGORIES.arrow;
   // ステータスが設置済/回収済ならステータス色、未設置ならカテゴリ色
   let fillColor;
-  if (arrow.status === 'placed') fillColor = '#1565c0';
+  if (arrow.status === 'placed') fillColor = '#2e7d32';
   else if (arrow.status === 'collected') fillColor = '#9e9e9e';
   else fillColor = cat.color;
 
@@ -583,7 +583,7 @@ function toggleCategory(cat) {
       if (visible) {
         const catDef = CATEGORIES[arrow.category] || CATEGORIES.arrow;
         let fillColor;
-        if (arrow.status === 'placed') fillColor = '#1565c0';
+        if (arrow.status === 'placed') fillColor = '#2e7d32';
         else if (arrow.status === 'collected') fillColor = '#9e9e9e';
         else fillColor = catDef.color;
         arrowMarkers[id].setStyle({ opacity: 1, fillOpacity: 0.9, fillColor });
@@ -690,7 +690,7 @@ function buildList() {
   arrows.forEach(a => {
     const cat = CATEGORIES[a.category] || CATEGORIES.arrow;
     let dotColor;
-    if (a.status === 'placed') dotColor = '#1565c0';
+    if (a.status === 'placed') dotColor = '#2e7d32';
     else if (a.status === 'collected') dotColor = '#9e9e9e';
     else dotColor = cat.color;
 
@@ -809,7 +809,7 @@ async function saveArrow() {
   if (arrowMarkers[currentArrowId]) {
     const catDef = CATEGORIES[arrowData[currentArrowId].category] || CATEGORIES.arrow;
     let newColor;
-    if (status === 'placed') newColor = '#1565c0';
+    if (status === 'placed') newColor = '#2e7d32';
     else if (status === 'collected') newColor = '#9e9e9e';
     else newColor = catDef.color;
     arrowMarkers[currentArrowId].setStyle({ fillColor: newColor });
