@@ -331,25 +331,42 @@ async function loadKML() {
     }
 
     // CourseSignsレイヤーのポイント取得
-    const folders = doc.querySelectorAll('Folder');
-    folders.forEach(folder => {
-      const nameEl = folder.querySelector(':scope > name');
-      if (nameEl && nameEl.textContent.trim() === 'CourseSigns') {
-        const placemarks = folder.querySelectorAll('Placemark');
-        placemarks.forEach((pm, idx) => {
-          const pmName = pm.querySelector('name');
-          const coordEl = pm.querySelector('Point coordinates');
-          if (coordEl) {
-            const parts = coordEl.textContent.trim().split(',');
+    // KMLのFolder構造を探索してCourseSignsを見つける
+    const allNames = doc.getElementsByTagName('name');
+    let courseSignsFolder = null;
+    for (let i = 0; i < allNames.length; i++) {
+      if (allNames[i].textContent.trim() === 'CourseSigns') {
+        courseSignsFolder = allNames[i].parentNode; // Folder要素
+        break;
+      }
+    }
+
+    if (courseSignsFolder) {
+      const placemarks = courseSignsFolder.getElementsByTagName('Placemark');
+      for (let i = 0; i < placemarks.length; i++) {
+        const pm = placemarks[i];
+        const pmNames = pm.getElementsByTagName('name');
+        const points = pm.getElementsByTagName('Point');
+        if (points.length > 0) {
+          const coords = points[0].getElementsByTagName('coordinates');
+          if (coords.length > 0) {
+            const parts = coords[0].textContent.trim().split(',');
             const lng = parseFloat(parts[0]);
             const lat = parseFloat(parts[1]);
-            const name = pmName ? pmName.textContent.trim() : ('Sign' + (idx + 1));
+            const name = pmNames.length > 0 ? pmNames[0].textContent.trim() : ('Sign' + (i + 1));
             KML_SIGNS.push({ name, lat, lng });
           }
-        });
-        console.log('CourseSigns loaded:', KML_SIGNS.length, 'points');
+        }
       }
-    });
+      console.log('CourseSigns loaded:', KML_SIGNS.length, 'points');
+    } else {
+      console.warn('CourseSigns folder not found in KML. Available folders:');
+      const folders = doc.getElementsByTagName('Folder');
+      for (let i = 0; i < folders.length; i++) {
+        const fn = folders[i].getElementsByTagName('name');
+        if (fn.length > 0) console.log(' -', fn[0].textContent.trim());
+      }
+    }
   } catch (e) {
     console.error('KML load error:', e);
     showToast('コースデータの読み込みに失敗しました');
