@@ -168,8 +168,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
   background: white; border-radius: 8px; padding: 8px 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 11px;
 }
-.legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+.legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; cursor: pointer; }
+.legend-item.disabled { opacity: 0.3; }
 .legend-color { width: 10px; height: 10px; border-radius: 50%; }
+.legend-section { font-size: 10px; font-weight: 700; color: #999; margin-top: 6px; padding-top: 4px; border-top: 1px solid #eee; }
+.legend-section:first-child { margin-top: 0; border-top: none; padding-top: 0; }
 
 /* Add mode banner */
 .add-banner {
@@ -212,9 +215,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 
 <!-- Legend -->
 <div class="legend">
-  <div class="legend-item"><div class="legend-color" style="background:#d32f2f;"></div>未設置</div>
-  <div class="legend-item"><div class="legend-color" style="background:#1565c0;"></div>設置済</div>
-  <div class="legend-item"><div class="legend-color" style="background:#9e9e9e;"></div>回収済</div>
+  <div class="legend-section">種類（タップで表示切替）</div>
+  <div class="legend-item" onclick="toggleCategory('arrow')"><div class="legend-color" style="background:#d32f2f;"></div>矢印 (37)</div>
+  <div class="legend-item" onclick="toggleCategory('danger')"><div class="legend-color" style="background:#ff6f00;"></div>注意/危険 (3)</div>
+  <div class="legend-item" onclick="toggleCategory('tape')"><div class="legend-color" style="background:#2e7d32;"></div>テープ (4)</div>
+  <div class="legend-item" onclick="toggleCategory('info')"><div class="legend-color" style="background:#6a1b9a;"></div>案内 (5)</div>
+  <div class="legend-section">ステータス</div>
+  <div class="legend-item"><div class="legend-color" style="background:#d32f2f; border: 2px solid #d32f2f;"></div>未設置</div>
+  <div class="legend-item"><div class="legend-color" style="background:#1565c0; border: 2px solid #1565c0;"></div>設置済</div>
+  <div class="legend-item"><div class="legend-color" style="background:#9e9e9e; border: 2px solid #9e9e9e;"></div>回収済</div>
 </div>
 
 <!-- Add button -->
@@ -326,58 +335,69 @@ const ARROW_COLORS = {
   collected: '#9e9e9e'
 };
 
-// KMLから取得した初期矢印ポイント（49箇所）
+// KMLから取得した初期矢印ポイント（49箇所）— カテゴリ付き
 const KML_SIGNS = [
-  { name: 'TaiheiArrow1', lat: 37.1438251, lng: 138.6238318 },
-  { name: 'TaiheiArrow2', lat: 37.1460115, lng: 138.6254259 },
-  { name: 'AisawaCarefulSign', lat: 37.1488263, lng: 138.6269233 },
-  { name: 'AisawaGreenPoleTape2', lat: 37.1525205, lng: 138.6235135 },
-  { name: 'AisawaGreenPoleTape1', lat: 37.153149, lng: 138.624404 },
-  { name: 'yabukozakiArrow1', lat: 37.1525043, lng: 138.6194578 },
-  { name: 'YabukozakiArrow2', lat: 37.1534449, lng: 138.6191574 },
-  { name: 'YabukozakiArrow3', lat: 37.1548189, lng: 138.6155949 },
-  { name: 'YabukozakiArrow4', lat: 37.15397, lng: 138.61532 },
-  { name: 'ChitoseArrow3', lat: 37.112625, lng: 138.604422 },
-  { name: 'ChitoseArrow4', lat: 37.1145426, lng: 138.607913 },
-  { name: 'ChitoseArrow5', lat: 37.1210573, lng: 138.6065214 },
-  { name: 'ChitoseArrow6', lat: 37.1207451, lng: 138.6097347 },
-  { name: 'SennoArrow0', lat: 37.1476598, lng: 138.5993455 },
-  { name: 'SennoArrow1', lat: 37.1480242, lng: 138.5988654 },
-  { name: 'SennoArrow2', lat: 37.1528506, lng: 138.5919911 },
-  { name: 'SennoArrow3', lat: 37.1507416, lng: 138.5957337 },
-  { name: 'SennoArrow5', lat: 37.15158, lng: 138.5948704 },
-  { name: 'SennoArrow6', lat: 37.151471, lng: 138.5934668 },
-  { name: 'SennoArrow7', lat: 37.1517885, lng: 138.5895428 },
-  { name: 'SennoArrow8', lat: 37.1506738, lng: 138.5888929 },
-  { name: 'TanokuraArrow1', lat: 37.1495457, lng: 138.585383 },
-  { name: 'TanokuraArrow2', lat: 37.1497563, lng: 138.5857961 },
-  { name: 'TanokuraArrow3', lat: 37.149858, lng: 138.5845701 },
-  { name: 'TanokuraArrow4', lat: 37.1490724, lng: 138.5842548 },
-  { name: 'TanokuraArrow6', lat: 37.1497822, lng: 138.582911 },
-  { name: 'TanokuraArrow7', lat: 37.1503511, lng: 138.5811814 },
-  { name: 'NabiroArrow1', lat: 37.1483488, lng: 138.5801964 },
-  { name: 'NabiroArrow2', lat: 37.1434199, lng: 138.5806111 },
-  { name: 'NabiroArrow4', lat: 37.1428241, lng: 138.5822991 },
-  { name: 'NabiroArrow5', lat: 37.1413178, lng: 138.583139 },
-  { name: 'KamoArrow1', lat: 37.1389573, lng: 138.5817384 },
-  { name: 'KamoArrow2', lat: 37.1360069, lng: 138.578854 },
-  { name: 'KamoArrow3', lat: 37.1357696, lng: 138.5793876 },
-  { name: 'KamoArrow4', lat: 37.1340623, lng: 138.582032 },
-  { name: 'IkejiriArrow2', lat: 37.1268282, lng: 138.5874489 },
-  { name: 'IkejiriArrow1', lat: 37.1276699, lng: 138.5838917 },
-  { name: 'IkejiriGreenPoleTape1', lat: 37.1230193, lng: 138.5888679 },
-  { name: 'IkejiriGreenPoleTape2', lat: 37.1228567, lng: 138.5895224 },
-  { name: 'IkejiriArrow3', lat: 37.1185301, lng: 138.5908849 },
-  { name: 'ChitoseArrow1', lat: 37.1101972, lng: 138.6042953 },
-  { name: 'ChitoseArrow2', lat: 37.1119361, lng: 138.6036486 },
-  { name: 'TanokuraDanger1', lat: 37.1498073, lng: 138.5853464 },
-  { name: 'TanokuraInfo', lat: 37.1497988, lng: 138.5850165 },
-  { name: 'TanokuraDanger2', lat: 37.1497813, lng: 138.5814838 },
-  { name: 'KamoInfo1', lat: 37.1354709, lng: 138.5795188 },
-  { name: 'ChitoseInfo1', lat: 37.112068, lng: 138.6038535 },
-  { name: 'ChitoseInfo2', lat: 37.1210806, lng: 138.6102876 },
-  { name: 'NohbutaiInfo1', lat: 37.1288171, lng: 138.6145576 }
+  { name: 'TaiheiArrow1', lat: 37.1438251, lng: 138.6238318, category: 'arrow' },
+  { name: 'TaiheiArrow2', lat: 37.1460115, lng: 138.6254259, category: 'arrow' },
+  { name: 'AisawaCarefulSign', lat: 37.1488263, lng: 138.6269233, category: 'danger' },
+  { name: 'AisawaGreenPoleTape2', lat: 37.1525205, lng: 138.6235135, category: 'tape' },
+  { name: 'AisawaGreenPoleTape1', lat: 37.153149, lng: 138.624404, category: 'tape' },
+  { name: 'yabukozakiArrow1', lat: 37.1525043, lng: 138.6194578, category: 'arrow' },
+  { name: 'YabukozakiArrow2', lat: 37.1534449, lng: 138.6191574, category: 'arrow' },
+  { name: 'YabukozakiArrow3', lat: 37.1548189, lng: 138.6155949, category: 'arrow' },
+  { name: 'YabukozakiArrow4', lat: 37.15397, lng: 138.61532, category: 'arrow' },
+  { name: 'ChitoseArrow3', lat: 37.112625, lng: 138.604422, category: 'arrow' },
+  { name: 'ChitoseArrow4', lat: 37.1145426, lng: 138.607913, category: 'arrow' },
+  { name: 'ChitoseArrow5', lat: 37.1210573, lng: 138.6065214, category: 'arrow' },
+  { name: 'ChitoseArrow6', lat: 37.1207451, lng: 138.6097347, category: 'arrow' },
+  { name: 'SennoArrow0', lat: 37.1476598, lng: 138.5993455, category: 'arrow' },
+  { name: 'SennoArrow1', lat: 37.1480242, lng: 138.5988654, category: 'arrow' },
+  { name: 'SennoArrow2', lat: 37.1528506, lng: 138.5919911, category: 'arrow' },
+  { name: 'SennoArrow3', lat: 37.1507416, lng: 138.5957337, category: 'arrow' },
+  { name: 'SennoArrow5', lat: 37.15158, lng: 138.5948704, category: 'arrow' },
+  { name: 'SennoArrow6', lat: 37.151471, lng: 138.5934668, category: 'arrow' },
+  { name: 'SennoArrow7', lat: 37.1517885, lng: 138.5895428, category: 'arrow' },
+  { name: 'SennoArrow8', lat: 37.1506738, lng: 138.5888929, category: 'arrow' },
+  { name: 'TanokuraArrow1', lat: 37.1495457, lng: 138.585383, category: 'arrow' },
+  { name: 'TanokuraArrow2', lat: 37.1497563, lng: 138.5857961, category: 'arrow' },
+  { name: 'TanokuraArrow3', lat: 37.149858, lng: 138.5845701, category: 'arrow' },
+  { name: 'TanokuraArrow4', lat: 37.1490724, lng: 138.5842548, category: 'arrow' },
+  { name: 'TanokuraArrow6', lat: 37.1497822, lng: 138.582911, category: 'arrow' },
+  { name: 'TanokuraArrow7', lat: 37.1503511, lng: 138.5811814, category: 'arrow' },
+  { name: 'NabiroArrow1', lat: 37.1483488, lng: 138.5801964, category: 'arrow' },
+  { name: 'NabiroArrow2', lat: 37.1434199, lng: 138.5806111, category: 'arrow' },
+  { name: 'NabiroArrow4', lat: 37.1428241, lng: 138.5822991, category: 'arrow' },
+  { name: 'NabiroArrow5', lat: 37.1413178, lng: 138.583139, category: 'arrow' },
+  { name: 'KamoArrow1', lat: 37.1389573, lng: 138.5817384, category: 'arrow' },
+  { name: 'KamoArrow2', lat: 37.1360069, lng: 138.578854, category: 'arrow' },
+  { name: 'KamoArrow3', lat: 37.1357696, lng: 138.5793876, category: 'arrow' },
+  { name: 'KamoArrow4', lat: 37.1340623, lng: 138.582032, category: 'arrow' },
+  { name: 'IkejiriArrow2', lat: 37.1268282, lng: 138.5874489, category: 'arrow' },
+  { name: 'IkejiriArrow1', lat: 37.1276699, lng: 138.5838917, category: 'arrow' },
+  { name: 'IkejiriGreenPoleTape1', lat: 37.1230193, lng: 138.5888679, category: 'tape' },
+  { name: 'IkejiriGreenPoleTape2', lat: 37.1228567, lng: 138.5895224, category: 'tape' },
+  { name: 'IkejiriArrow3', lat: 37.1185301, lng: 138.5908849, category: 'arrow' },
+  { name: 'ChitoseArrow1', lat: 37.1101972, lng: 138.6042953, category: 'arrow' },
+  { name: 'ChitoseArrow2', lat: 37.1119361, lng: 138.6036486, category: 'arrow' },
+  { name: 'TanokuraDanger1', lat: 37.1498073, lng: 138.5853464, category: 'danger' },
+  { name: 'TanokuraInfo', lat: 37.1497988, lng: 138.5850165, category: 'info' },
+  { name: 'TanokuraDanger2', lat: 37.1497813, lng: 138.5814838, category: 'danger' },
+  { name: 'KamoInfo1', lat: 37.1354709, lng: 138.5795188, category: 'info' },
+  { name: 'ChitoseInfo1', lat: 37.112068, lng: 138.6038535, category: 'info' },
+  { name: 'ChitoseInfo2', lat: 37.1210806, lng: 138.6102876, category: 'info' },
+  { name: 'NohbutaiInfo1', lat: 37.1288171, lng: 138.6145576, category: 'info' }
 ];
+
+// カテゴリ定義
+const CATEGORIES = {
+  arrow:  { label: '矢印',      color: '#d32f2f', icon: '→' },
+  danger: { label: '注意/危険',  color: '#ff6f00', icon: '⚠' },
+  tape:   { label: 'テープ',    color: '#2e7d32', icon: '●' },
+  info:   { label: '案内',      color: '#6a1b9a', icon: 'ℹ' }
+};
+
+// カテゴリ表示/非表示
+let categoryVisible = { arrow: true, danger: true, tape: true, info: true };
 
 // 状態
 let map;
@@ -509,16 +529,22 @@ async function loadData() {
 // マーカー追加
 // =============================================
 function addMarker(arrow) {
-  const color = ARROW_COLORS[arrow.status] || '#d32f2f';
+  const cat = CATEGORIES[arrow.category] || CATEGORIES.arrow;
+  // ステータスが設置済/回収済ならステータス色、未設置ならカテゴリ色
+  let fillColor;
+  if (arrow.status === 'placed') fillColor = '#1565c0';
+  else if (arrow.status === 'collected') fillColor = '#9e9e9e';
+  else fillColor = cat.color;
+
   const marker = L.circleMarker([arrow.lat, arrow.lng], {
     radius: 8,
-    fillColor: color,
+    fillColor: fillColor,
     color: '#fff',
     weight: 2,
     fillOpacity: 0.9
   }).addTo(map);
 
-  marker.bindTooltip(arrow.name, {
+  marker.bindTooltip(cat.icon + ' ' + arrow.name, {
     permanent: false,
     direction: 'top',
     offset: [0, -10]
@@ -526,6 +552,53 @@ function addMarker(arrow) {
 
   marker.on('click', () => openModal(arrow.arrow_id));
   arrowMarkers[arrow.arrow_id] = marker;
+
+  // カテゴリ非表示中なら隠す
+  if (!categoryVisible[arrow.category]) {
+    marker.setStyle({ opacity: 0, fillOpacity: 0 });
+    marker.unbindTooltip();
+    marker._hidden = true;
+  }
+}
+
+// =============================================
+// カテゴリ表示切替
+// =============================================
+function toggleCategory(cat) {
+  categoryVisible[cat] = !categoryVisible[cat];
+  const visible = categoryVisible[cat];
+
+  // レジェンド項目の見た目更新
+  const legendItems = document.querySelectorAll('.legend-item[onclick]');
+  legendItems.forEach(item => {
+    const onclick = item.getAttribute('onclick');
+    if (onclick && onclick.includes("'" + cat + "'")) {
+      item.classList.toggle('disabled', !visible);
+    }
+  });
+
+  // マーカー表示/非表示
+  Object.keys(arrowData).forEach(id => {
+    const arrow = arrowData[id];
+    if (arrow.category === cat && arrowMarkers[id]) {
+      if (visible) {
+        const catDef = CATEGORIES[arrow.category] || CATEGORIES.arrow;
+        let fillColor;
+        if (arrow.status === 'placed') fillColor = '#1565c0';
+        else if (arrow.status === 'collected') fillColor = '#9e9e9e';
+        else fillColor = catDef.color;
+        arrowMarkers[id].setStyle({ opacity: 1, fillOpacity: 0.9, fillColor });
+        arrowMarkers[id].bindTooltip(catDef.icon + ' ' + arrow.name, {
+          permanent: false, direction: 'top', offset: [0, -10]
+        });
+        arrowMarkers[id]._hidden = false;
+      } else {
+        arrowMarkers[id].setStyle({ opacity: 0, fillOpacity: 0 });
+        arrowMarkers[id].unbindTooltip();
+        arrowMarkers[id]._hidden = true;
+      }
+    }
+  });
 }
 
 // =============================================
@@ -616,16 +689,21 @@ function buildList() {
 
   let html = '';
   arrows.forEach(a => {
-    const color = ARROW_COLORS[a.status] || '#d32f2f';
+    const cat = CATEGORIES[a.category] || CATEGORIES.arrow;
+    let dotColor;
+    if (a.status === 'placed') dotColor = '#1565c0';
+    else if (a.status === 'collected') dotColor = '#9e9e9e';
+    else dotColor = cat.color;
+
     const statusLabel = a.status === 'not_placed' ? '未設置' : a.status === 'placed' ? '設置済' : '回収済';
-    const meta = [statusLabel];
+    const meta = [cat.label, statusLabel];
     if (a.work_date) meta.push(a.work_date);
     if (a.worker) meta.push(a.worker);
 
     html += '<div class="list-item" onclick="focusArrow(\'' + a.arrow_id + '\')">'
-      + '<div class="list-dot" style="background:' + color + ';"></div>'
+      + '<div class="list-dot" style="background:' + dotColor + ';"></div>'
       + '<div class="list-info">'
-      + '<div class="list-name">' + a.name + '</div>'
+      + '<div class="list-name">' + cat.icon + ' ' + a.name + '</div>'
       + '<div class="list-meta">' + meta.join(' / ') + '</div>'
       + '</div></div>';
   });
@@ -657,9 +735,10 @@ function openModal(arrowId) {
   const arrow = arrowData[arrowId];
   if (!arrow) return;
 
-  document.getElementById('modalTitle').textContent = arrow.name;
+  const cat = CATEGORIES[arrow.category] || CATEGORIES.arrow;
+  document.getElementById('modalTitle').textContent = cat.icon + ' ' + arrow.name;
   document.getElementById('modalSub').textContent =
-    '座標: ' + Number(arrow.lat).toFixed(5) + ', ' + Number(arrow.lng).toFixed(5);
+    cat.label + ' / 座標: ' + Number(arrow.lat).toFixed(5) + ', ' + Number(arrow.lng).toFixed(5);
 
   // ステータスボタン
   document.querySelectorAll('.status-btn').forEach(btn => {
@@ -720,9 +799,12 @@ async function saveArrow() {
 
     // マーカー色更新
     if (arrowMarkers[currentArrowId]) {
-      arrowMarkers[currentArrowId].setStyle({
-        fillColor: ARROW_COLORS[status]
-      });
+      const catDef = CATEGORIES[arrowData[currentArrowId].category] || CATEGORIES.arrow;
+      let newColor;
+      if (status === 'placed') newColor = '#1565c0';
+      else if (status === 'collected') newColor = '#9e9e9e';
+      else newColor = catDef.color;
+      arrowMarkers[currentArrowId].setStyle({ fillColor: newColor });
     }
 
     updateStats();
@@ -793,6 +875,7 @@ function loadKMLSigns() {
       name: sign.name,
       lat: sign.lat,
       lng: sign.lng,
+      category: sign.category || 'arrow',
       status: 'not_placed',
       work_date: '',
       worker: '',
