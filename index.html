@@ -157,8 +157,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
   background: white; border-radius: 8px; padding: 8px 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1); font-size: 11px;
 }
-.legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+.legend-item { display: flex; align-items: center; gap: 6px; margin: 2px 0; cursor: pointer; }
+.legend-item.disabled { opacity: 0.3; }
 .legend-color { width: 20px; height: 3px; border-radius: 2px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+.legend-section { font-size: 10px; font-weight: 700; color: #999; margin-top: 6px; padding-top: 4px; border-top: 1px solid #eee; }
+.legend-section:first-child { margin-top: 0; border-top: none; padding-top: 0; }
+
+/* Stair stats */
+.stair-stats {
+  position: fixed; bottom: 80px; left: 16px; z-index: 900;
+  background: white; border-radius: 12px; padding: 10px 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15); font-size: 12px;
+}
+.stair-stats-title { font-size: 10px; font-weight: 700; color: #7b1fa2; margin-bottom: 4px; }
+.stair-stats-row { display: flex; gap: 12px; }
+.stair-stat { text-align: center; }
+.stair-stat-num { font-size: 16px; font-weight: 700; }
+.stair-stat-label { font-size: 9px; color: #666; }
+.stair-stat-red .stair-stat-num { color: #d32f2f; }
+.stair-stat-yellow .stair-stat-num { color: #f9a825; }
+.stair-stat-green .stair-stat-num { color: #2e7d32; }
 </style>
 </head>
 <body>
@@ -189,9 +208,22 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 
 <!-- Legend -->
 <div class="legend">
+  <div class="legend-section">草刈り区間</div>
   <div class="legend-item"><div class="legend-color" style="background:#d32f2f;"></div>未着手</div>
   <div class="legend-item"><div class="legend-color" style="background:#f9a825;"></div>作業中</div>
   <div class="legend-item"><div class="legend-color" style="background:#2e7d32;"></div>完了</div>
+  <div class="legend-section">階段・ロープ</div>
+  <div class="legend-item" onclick="toggleStairs()"><div class="legend-dot" style="background:#7b1fa2;"></div>🪜 階段ポイント (12)</div>
+</div>
+
+<!-- Stair stats -->
+<div class="stair-stats">
+  <div class="stair-stats-title">🪜 階段・ロープ整備</div>
+  <div class="stair-stats-row">
+    <div class="stair-stat stair-stat-red"><div class="stair-stat-num" id="stairNotStarted">0</div><div class="stair-stat-label">未着手</div></div>
+    <div class="stair-stat stair-stat-yellow"><div class="stair-stat-num" id="stairInProgress">0</div><div class="stair-stat-label">作業中</div></div>
+    <div class="stair-stat stair-stat-green"><div class="stair-stat-num" id="stairCompleted">0</div><div class="stair-stat-label">完了</div></div>
+  </div>
 </div>
 
 <!-- List toggle button -->
@@ -200,7 +232,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 <!-- Section list panel -->
 <div class="list-panel" id="listPanel">
   <div class="list-panel-header">
-    <h2>区間一覧</h2>
+    <h2>区間・階段 一覧</h2>
     <button class="list-close" onclick="toggleList()">✕</button>
   </div>
   <div class="list-content" id="listContent"></div>
@@ -290,6 +322,26 @@ const AID_STATIONS = [
   { name: 'Aidstation3', lat: 37.1179, lng: 138.5919 }
 ];
 
+// =============================================
+// 階段・ロープポイント — KMLから抽出した12ポイント
+// =============================================
+const STAIRS = [
+  { id: 'stair-01', name: 'Aisawa_Ridge', description: 'two thick ropes and one tiger rope (done)', lat: 37.15054, lng: 138.62836 },
+  { id: 'stair-02', name: 'Yomogihira_Kichiensan', description: 'small stairs + Kuwa path', lat: 37.1478015, lng: 138.6087038 },
+  { id: 'stair-03', name: 'Senno_Entrance', description: 'big stairs + rope', lat: 37.1480562, lng: 138.5988394 },
+  { id: 'stair-04', name: 'Tanokura_Forest', description: 'stairs and rope (downhill)', lat: 37.14976, lng: 138.5829 },
+  { id: 'stair-05', name: 'Nabiro_Entrance', description: 'Stairs and Kuwa', lat: 37.1477203, lng: 138.5806815 },
+  { id: 'stair-06', name: 'Nabiro_Tetto', description: 'Stairs or Rope', lat: 37.1423954, lng: 138.5828212 },
+  { id: 'stair-07', name: 'Ikejiri_Entrance', description: 'big stairs (two thick ropes + two tiger ropes installed)', lat: 37.1277017, lng: 138.5840092 },
+  { id: 'stair-08', name: 'Before_Ikejiri_Shrine', description: 'add ropes in steep downhills (two places)', lat: 37.1272418, lng: 138.5862288 },
+  { id: 'stair-09', name: 'Ikejiri_Tombstones', description: 'BIG STAIRS!', lat: 37.1268079, lng: 138.5876682 },
+  { id: 'stair-10', name: 'Chitose_Bridge', description: 'Kenichisan made the bridge and the stairs', lat: 37.1177411, lng: 138.5918187 },
+  { id: 'stair-11', name: 'Chitose_Uphill', description: 'add ropes and make a path with Kuwa', lat: 37.1171771, lng: 138.5925237 },
+  { id: 'stair-12', name: 'Matsudai_Castle', description: 'big stairs and thick rope required', lat: 37.1247561, lng: 138.6135577 }
+];
+
+const STAIR_COLOR = '#7b1fa2'; // purple
+
 // ステータス色
 const STATUS_COLORS = {
   not_started: '#d32f2f',
@@ -301,7 +353,11 @@ const STATUS_COLORS = {
 let map;
 let sectionData = {};
 let sectionLayers = {};
+let stairData = {};
+let stairMarkers = {};
+let stairsVisible = true;
 let currentSectionId = null;
+let currentItemType = null; // 'section' or 'stair'
 
 // =============================================
 // 地図初期化
@@ -330,6 +386,14 @@ function initMap() {
     sectionLayers[sec.id] = polyline;
   });
 
+  // 階段ポイント
+  STAIRS.forEach(stair => {
+    stairData[stair.id] = stairData[stair.id] || {
+      status: 'not_started', worker: '', memo: stair.description, work_date: '', updated_at: ''
+    };
+    addStairMarker(stair);
+  });
+
   // エイドステーション
   AID_STATIONS.forEach(as => {
     L.marker([as.lat, as.lng], {
@@ -344,6 +408,62 @@ function initMap() {
   // 全体表示
   const allBounds = L.latLngBounds(COURSE_COORDS);
   map.fitBounds(allBounds, { padding: [30, 30] });
+}
+
+// =============================================
+// 階段マーカー
+// =============================================
+function addStairMarker(stair) {
+  const data = stairData[stair.id] || { status: 'not_started' };
+  let fillColor;
+  if (data.status === 'completed') fillColor = '#2e7d32';
+  else if (data.status === 'in_progress') fillColor = '#f9a825';
+  else fillColor = STAIR_COLOR;
+
+  const marker = L.circleMarker([stair.lat, stair.lng], {
+    radius: 9,
+    fillColor: fillColor,
+    color: '#fff',
+    weight: 2,
+    fillOpacity: 0.9
+  }).addTo(map);
+
+  marker.bindTooltip('🪜 ' + stair.name, {
+    permanent: false, direction: 'top', offset: [0, -10]
+  });
+
+  marker.on('click', () => openStairModal(stair.id));
+  stairMarkers[stair.id] = marker;
+}
+
+function updateStairMarker(stairId) {
+  if (!stairMarkers[stairId]) return;
+  const data = stairData[stairId] || { status: 'not_started' };
+  let fillColor;
+  if (data.status === 'completed') fillColor = '#2e7d32';
+  else if (data.status === 'in_progress') fillColor = '#f9a825';
+  else fillColor = STAIR_COLOR;
+  stairMarkers[stairId].setStyle({ fillColor });
+}
+
+function toggleStairs() {
+  stairsVisible = !stairsVisible;
+  const legendItems = document.querySelectorAll('.legend-item[onclick]');
+  legendItems.forEach(item => {
+    if (item.getAttribute('onclick') === 'toggleStairs()') {
+      item.classList.toggle('disabled', !stairsVisible);
+    }
+  });
+  Object.keys(stairMarkers).forEach(id => {
+    if (stairsVisible) {
+      stairMarkers[id].setStyle({ opacity: 1, fillOpacity: 0.9 });
+      const stair = STAIRS.find(s => s.id === id);
+      if (stair) stairMarkers[id].bindTooltip('🪜 ' + stair.name, { permanent: false, direction: 'top', offset: [0, -10] });
+    } else {
+      stairMarkers[id].setStyle({ opacity: 0, fillOpacity: 0 });
+      stairMarkers[id].unbindTooltip();
+    }
+  });
 }
 
 // =============================================
@@ -388,6 +508,7 @@ async function loadData() {
         status: 'not_started', worker: '', memo: '', work_date: '', updated_at: ''
       };
     });
+    // stairDataはinitMapで初期化済み
     updateUI();
     return;
   }
@@ -398,13 +519,23 @@ async function loadData() {
     if (json.error) throw new Error(json.error);
 
     json.sections.forEach(row => {
-      sectionData[row.section_id] = {
+      const d = {
         status: row.status || 'not_started',
         worker: row.worker || '',
         memo: row.memo || '',
         work_date: row.work_date || '',
         updated_at: row.updated_at || ''
       };
+      // 階段IDか区間IDかで振り分け
+      if (row.section_id && row.section_id.startsWith('stair-')) {
+        // 既存のメモ（KML description）を保持
+        const existing = stairData[row.section_id];
+        if (existing && existing.memo && !d.memo) d.memo = existing.memo;
+        stairData[row.section_id] = d;
+        updateStairMarker(row.section_id);
+      } else {
+        sectionData[row.section_id] = d;
+      }
     });
     updateUI();
     document.getElementById('lastUpdated').textContent = '最終更新: ' + new Date().toLocaleString('ja-JP');
@@ -443,6 +574,16 @@ function updateUI() {
   const total = SECTIONS.length;
   const pct = Math.round((counts.completed / total) * 100);
   document.getElementById('progressFill').style.width = pct + '%';
+
+  // 階段統計
+  let stairCounts = { not_started: 0, in_progress: 0, completed: 0 };
+  STAIRS.forEach(stair => {
+    const d = stairData[stair.id] || { status: 'not_started' };
+    stairCounts[d.status] = (stairCounts[d.status] || 0) + 1;
+  });
+  document.getElementById('stairNotStarted').textContent = stairCounts.not_started;
+  document.getElementById('stairInProgress').textContent = stairCounts.in_progress;
+  document.getElementById('stairCompleted').textContent = stairCounts.completed;
 
   // リスト更新
   buildList();
@@ -486,6 +627,40 @@ function buildList() {
 
     container.appendChild(item);
   });
+
+  // 階段セクション
+  const stairHeader = document.createElement('div');
+  stairHeader.className = 'list-area-header';
+  stairHeader.style.color = '#7b1fa2';
+  stairHeader.textContent = '🪜 階段・ロープ整備';
+  container.appendChild(stairHeader);
+
+  STAIRS.forEach(stair => {
+    const data = stairData[stair.id] || { status: 'not_started' };
+    let color;
+    if (data.status === 'completed') color = '#2e7d32';
+    else if (data.status === 'in_progress') color = '#f9a825';
+    else color = STAIR_COLOR;
+    const statusText = { not_started: '未着手', in_progress: '作業中', completed: '完了' }[data.status] || '未着手';
+
+    const item = document.createElement('div');
+    item.className = 'list-item';
+    item.onclick = () => { toggleList(); openStairModal(stair.id); };
+
+    let meta = statusText;
+    if (data.work_date) {
+      const wd = new Date(data.work_date + 'T00:00:00');
+      if (!isNaN(wd)) meta += ' / ' + wd.toLocaleDateString('ja-JP') + '整備';
+    }
+    if (data.worker) meta += ' / ' + data.worker;
+
+    item.innerHTML = '<div class="list-dot" style="background:' + color + '"></div>' +
+      '<div class="list-info"><div class="list-name">🪜 ' + stair.name + '</div>' +
+      '<div class="list-meta">' + stair.description + '</div>' +
+      '<div class="list-meta">' + meta + '</div></div>';
+
+    container.appendChild(item);
+  });
 }
 
 function toggleList() {
@@ -495,8 +670,31 @@ function toggleList() {
 // =============================================
 // モーダル
 // =============================================
+function openStairModal(stairId) {
+  currentSectionId = stairId;
+  currentItemType = 'stair';
+  const stair = STAIRS.find(s => s.id === stairId);
+  if (!stair) return;
+
+  document.getElementById('modalTitle').textContent = '🪜 ' + stair.name;
+  document.getElementById('modalArea').textContent = stair.description;
+
+  const data = stairData[stairId] || { status: 'not_started', worker: '', memo: '', work_date: '' };
+
+  document.querySelectorAll('.status-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.status === data.status);
+  });
+
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('inputWorkDate').value = data.work_date || today;
+  document.getElementById('inputWorker').value = data.worker || '';
+  document.getElementById('inputMemo').value = data.memo || stair.description;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
 function openModal(sectionId) {
   currentSectionId = sectionId;
+  currentItemType = 'section';
   const sec = SECTIONS.find(s => s.id === sectionId);
   if (!sec) return;
 
@@ -545,9 +743,13 @@ async function saveSection() {
   const memo = document.getElementById('inputMemo').value.trim();
 
   // ローカル即時反映
-  sectionData[currentSectionId] = {
-    status, work_date, worker, memo, updated_at: new Date().toISOString()
-  };
+  const updateObj = { status, work_date, worker, memo, updated_at: new Date().toISOString() };
+  if (currentItemType === 'stair') {
+    stairData[currentSectionId] = updateObj;
+    updateStairMarker(currentSectionId);
+  } else {
+    sectionData[currentSectionId] = updateObj;
+  }
   updateUI();
 
   if (!API_URL) {
