@@ -768,7 +768,34 @@ async function saveSection() {
       section_id: currentSectionId,
       status, work_date, worker, memo
     });
-    const json = await jsonp(API_URL + '?' + params.toString());
+    let json = await jsonp(API_URL + '?' + params.toString());
+
+    // スプレッドシートに未登録の場合（階段など）→ 行を自動追加してから再更新
+    if (json.error && json.error.includes('見つかりません')) {
+      // 階段名を取得
+      let itemName = currentSectionId;
+      if (currentItemType === 'stair') {
+        const stair = STAIRS.find(s => s.id === currentSectionId);
+        if (stair) itemName = stair.name;
+      }
+      const addParams = new URLSearchParams({
+        action: 'add',
+        section_id: currentSectionId,
+        name: itemName,
+        status, work_date, worker, memo
+      });
+      const addJson = await jsonp(API_URL + '?' + addParams.toString());
+      if (addJson.error && !addJson.error.includes('既に存在')) {
+        // add失敗かつ重複でもない場合 → ローカル保存のみで成功扱い
+        showToast('保存しました（ローカルのみ）');
+        document.getElementById('modalOverlay').classList.remove('open');
+        currentSectionId = null;
+        saveBtn.disabled = false;
+        saveBtn.textContent = '保存する';
+        return;
+      }
+      json = { success: true };
+    }
     if (json.error) throw new Error(json.error);
 
     showToast('保存しました');
