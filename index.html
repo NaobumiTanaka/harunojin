@@ -782,7 +782,7 @@ async function saveSection() {
     if (json.success) {
       // OK — GAS側がupsert対応済み、またはスプレッドシートに既存
     } else if (json.error && json.error.includes('見つかりません')) {
-      // GAS側がupsert未対応の場合 → add アクションでフォールバック
+      // スプレッドシートに未登録（階段など） → add アクションでフォールバック
       const addParams = new URLSearchParams({
         action: 'add',
         section_id: currentSectionId,
@@ -790,8 +790,9 @@ async function saveSection() {
         status, work_date, worker, memo
       });
       const addJson = await jsonp(API_URL + '?' + addParams.toString());
-      // addの成功判定: success: true が明示的に返ってきたかを確認
+
       if (addJson.success) {
+        // add成功
         json = addJson;
       } else if (addJson.error && addJson.error.includes('既に存在')) {
         // 既に追加済み → 再度updateを試行
@@ -799,11 +800,23 @@ async function saveSection() {
         if (!json.success) {
           throw new Error(json.error || '再更新に失敗しました');
         }
+      } else if (addJson.sections) {
+        // GASがadd未対応（旧バージョン）→ getSections()が返ってきた
+        // ローカルには保存済みなのでセッション中は使える
+        showToast('⚠ GASの再デプロイが必要です（ローカル保存のみ）');
+        document.getElementById('modalOverlay').classList.remove('open');
+        currentSectionId = null;
+        saveBtn.disabled = false;
+        saveBtn.textContent = '保存する';
+        return;
       } else {
         throw new Error(addJson.error || 'データの追加に失敗しました');
       }
     } else if (json.error) {
       throw new Error(json.error);
+    } else if (json.sections) {
+      // GASが想定外のレスポンスを返した
+      throw new Error('GASの再デプロイが必要です');
     } else {
       throw new Error('サーバーからの応答が不正です');
     }
