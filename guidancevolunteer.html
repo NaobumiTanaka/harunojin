@@ -90,6 +90,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 .type-mandatory { background: #d32f2f; }
 .type-local { background: #e65100; }
 .type-student { background: #1565c0; }
+.type-aid { background: #ff9800; }
 
 /* Legend */
 .legend {
@@ -298,15 +299,13 @@ const VOLUNTEERS = [
   { id:'vol-21', num:'S2', type:'student', area:'Nohbutai/能舞台', runner_time:'11:30~16:30', lat:37.131536, lng:138.616097, admin_memo:'歩行者に注意してゆっくり通過するよう注意喚起。車の通りがある箇所では車を優先しランナーを安全に通過させてください。' },
   { id:'vol-22', num:'S3', type:'student', area:'Nohbutai/能舞台', runner_time:'11:30~16:30', lat:37.131511, lng:138.613626, admin_memo:'歩行者に注意してゆっくり通過するよう注意喚起。車の通りがある箇所では車を優先しランナーを安全に通過させてください。' },
   { id:'vol-23', num:'S4', type:'student', area:'Nohbutai/能舞台', runner_time:'', lat:37.1320435, lng:138.6138003, admin_memo:'' },
-  { id:'vol-24', num:'S5', type:'student', area:'Nohbutai/能舞台', runner_time:'', lat:37.1317676, lng:138.6138057, admin_memo:'' }
+  { id:'vol-24', num:'S5', type:'student', area:'Nohbutai/能舞台', runner_time:'', lat:37.1317676, lng:138.6138057, admin_memo:'' },
+  { id:'aid-01', num:'A1', type:'aid', area:'Aidstation1', runner_time:'', lat:37.1481, lng:138.6101, admin_memo:'' },
+  { id:'aid-02', num:'A2', type:'aid', area:'Aidstation2', runner_time:'', lat:37.1378, lng:138.5793, admin_memo:'' },
+  { id:'aid-03', num:'A3', type:'aid', area:'Aidstation3', runner_time:'', lat:37.1179, lng:138.5919, admin_memo:'' }
 ];
 
-// エイドステーション
-const AID_STATIONS = [
-  { name: 'Aidstation1', lat: 37.1481, lng: 138.6101 },
-  { name: 'Aidstation2', lat: 37.1378, lng: 138.5793 },
-  { name: 'Aidstation3', lat: 37.1179, lng: 138.5919 }
-];
+// エイドステーション（VOLUNTEERSに統合済み、座標参照用のみ）
 
 // ステータス色
 const STATUS_COLORS = {
@@ -324,7 +323,8 @@ const STATUS_LABELS = {
 const TYPE_LABELS = {
   mandatory: '必須',
   local: '地元',
-  student: '学生'
+  student: '学生',
+  aid: 'エイド'
 };
 
 // =============================================
@@ -420,18 +420,7 @@ function initMap() {
     }).addTo(map);
   });
 
-  // エイドステーション
-  AID_STATIONS.forEach(as => {
-    L.marker([as.lat, as.lng], {
-      icon: L.divIcon({
-        className: '',
-        html: '<div style="background:#ff9800;color:white;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);">⛽ ' + as.name + '</div>',
-        iconSize: null
-      })
-    }).addTo(map);
-  });
-
-  // ボランティアマーカー
+  // ボランティア＆エイドマーカー
   VOLUNTEERS.forEach(v => {
     volData[v.id] = volData[v.id] || {
       status: 'not_placed', member_name: '', admin_memo: v.admin_memo, member_memo: '',
@@ -444,18 +433,22 @@ function initMap() {
   map.fitBounds(allBounds, { padding: [30, 30] });
 }
 
+function aidIcon(color) {
+  return '<div style="background:' + color + ';color:white;padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,0.3);">⛽ Aid</div>';
+}
+
 function addVolMarker(v) {
   const data = volData[v.id] || { status: 'not_placed' };
   const color = STATUS_COLORS[data.status] || STATUS_COLORS.not_placed;
 
-  const marker = L.marker([v.lat, v.lng], {
-    icon: L.divIcon({
-      className: 'person-marker',
-      html: personSvg(color),
-      iconSize: [28, 28],
-      iconAnchor: [14, 24]
-    })
-  }).addTo(map);
+  let icon;
+  if (v.type === 'aid') {
+    icon = L.divIcon({ className: '', html: aidIcon(color), iconSize: null });
+  } else {
+    icon = L.divIcon({ className: 'person-marker', html: personSvg(color), iconSize: [28, 28], iconAnchor: [14, 24] });
+  }
+
+  const marker = L.marker([v.lat, v.lng], { icon }).addTo(map);
 
   marker.bindTooltip('#' + v.num + ' ' + v.area, {
     permanent: false, direction: 'top', offset: [0, -20]
@@ -472,12 +465,11 @@ function updateVolMarker(volId) {
   const data = volData[volId] || { status: 'not_placed' };
   const color = STATUS_COLORS[data.status] || STATUS_COLORS.not_placed;
 
-  volMarkers[volId].setIcon(L.divIcon({
-    className: 'person-marker',
-    html: personSvg(color),
-    iconSize: [28, 28],
-    iconAnchor: [14, 24]
-  }));
+  if (v.type === 'aid') {
+    volMarkers[volId].setIcon(L.divIcon({ className: '', html: aidIcon(color), iconSize: null }));
+  } else {
+    volMarkers[volId].setIcon(L.divIcon({ className: 'person-marker', html: personSvg(color), iconSize: [28, 28], iconAnchor: [14, 24] }));
+  }
 }
 
 // =============================================
