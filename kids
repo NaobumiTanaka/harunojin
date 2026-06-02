@@ -1,0 +1,128 @@
+// =============================================
+// Google Apps Script — Harunojin 2km ボランティア管理
+// =============================================
+// 使い方:
+// 1. Googleスプレッドシートを新規作成
+// 2. シート名を「2km」に変更
+// 3. 1行目にヘッダーを入力:
+//    A1: section_id | B1: name | C1: status | D1: worker | E1: phone
+//    F1: shift | G1: role | H1: memo | I1: member_memo | J1: updated_at
+// 4. 拡張機能 → Apps Script を開く
+// 5. このコードを貼り付けて保存
+// 6. デプロイ → 新しいデプロイ → ウェブアプリ
+//    - 次のユーザーとして実行: 自分
+//    - アクセスできるユーザー: 全員
+// 7. デプロイURLをHTMLの API_URL にセット
+// =============================================
+
+const SHEET_NAME = '2km';
+
+function doGet(e) {
+  const params = e.parameter;
+  const callback = params.callback;
+  let result;
+
+  try {
+    const action = params.action || 'read';
+
+    if (action === 'read') {
+      result = readAll();
+    } else if (action === 'update') {
+      result = updateRow(params);
+    } else if (action === 'add') {
+      result = addRow(params);
+    } else {
+      result = { error: '不明なアクション: ' + action };
+    }
+  } catch (err) {
+    result = { error: err.message };
+  }
+
+  const json = JSON.stringify(result);
+
+  if (callback) {
+    return ContentService.createTextOutput(callback + '(' + json + ')')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(json)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function readAll() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  if (!sheet) return { error: 'シート "' + SHEET_NAME + '" が見つかりません' };
+
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return { sections: [] };
+
+  const headers = data[0];
+  const sections = [];
+
+  for (let i = 1; i < data.length; i++) {
+    const row = {};
+    headers.forEach((h, j) => { row[h] = data[i][j] || ''; });
+    sections.push(row);
+  }
+
+  return { sections };
+}
+
+function updateRow(params) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  if (!sheet) return { error: 'シート "' + SHEET_NAME + '" が見つかりません' };
+
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const idCol = headers.indexOf('section_id');
+  if (idCol === -1) return { error: 'section_id列が見つかりません' };
+
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][idCol] === params.section_id) {
+      // 既存行を更新
+      const updates = {
+        name: params.name,
+        status: params.status,
+        worker: params.worker,
+        phone: params.phone,
+        shift: params.shift,
+        role: params.role,
+        memo: params.memo,
+        member_memo: params.member_memo,
+        updated_at: new Date().toISOString()
+      };
+
+      headers.forEach((h, j) => {
+        if (updates[h] !== undefined) {
+          sheet.getRange(i + 1, j + 1).setValue(updates[h]);
+        }
+      });
+
+      return { success: true, section_id: params.section_id };
+    }
+  }
+
+  return { error: 'section_id "' + params.section_id + '" が見つかりません' };
+}
+
+function addRow(params) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  if (!sheet) return { error: 'シート "' + SHEET_NAME + '" が見つかりません' };
+
+  const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  const newRow = headers.map(h => {
+    if (h === 'section_id') return params.section_id || '';
+    if (h === 'name') return params.name || '';
+    if (h === 'status') return params.status || 'not_placed';
+    if (h === 'worker') return params.worker || '';
+    if (h === 'phone') return params.phone || '';
+    if (h === 'shift') return params.shift || 'morning';
+    if (h === 'role') return params.role || '誘導';
+    if (h === 'memo') return params.memo || '';
+    if (h === 'member_memo') return params.member_memo || '';
+    if (h === 'updated_at') return new Date().toISOString();
+    return '';
+  });
+
+  sheet.appendRow(newRow);
+  return { success: true, section_id: params.section_id };
+}
