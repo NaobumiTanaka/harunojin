@@ -243,6 +243,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
   <div class="modal" onclick="event.stopPropagation()">
     <h3 id="modalTitle"></h3>
     <div class="modal-area" id="modalArea"></div>
+    <a id="gmapLink" href="#" target="_blank" rel="noopener"
+       style="display:inline-block;margin-bottom:12px;padding:8px 14px;background:#4285F4;color:white;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
+      📍 Google Mapsで開く
+    </a>
     <div class="status-btns">
       <button class="status-btn" data-status="not_started" onclick="selectStatus(this)">未着手</button>
       <button class="status-btn" data-status="in_progress" onclick="selectStatus(this)">作業中</button>
@@ -678,6 +682,7 @@ function openStairModal(stairId) {
 
   document.getElementById('modalTitle').textContent = '🪜 ' + stair.name;
   document.getElementById('modalArea').textContent = stair.description;
+  document.getElementById('gmapLink').href = 'https://www.google.com/maps?q=' + stair.lat + ',' + stair.lng;
 
   const data = stairData[stairId] || { status: 'not_started', worker: '', memo: '', work_date: '' };
 
@@ -700,6 +705,10 @@ function openModal(sectionId) {
 
   document.getElementById('modalTitle').textContent = sec.name;
   document.getElementById('modalArea').textContent = 'エリア: ' + sec.area;
+  // 区間の中間点でGoogle Mapsリンク
+  const midIdx = Math.floor((sec.startIdx + sec.endIdx) / 2);
+  const midCoord = COURSE_COORDS[midIdx];
+  document.getElementById('gmapLink').href = 'https://www.google.com/maps?q=' + midCoord[0] + ',' + midCoord[1];
 
   const data = sectionData[sectionId] || { status: 'not_started', worker: '', memo: '', work_date: '' };
 
