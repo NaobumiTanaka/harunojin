@@ -246,6 +246,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
   <div class="modal" onclick="event.stopPropagation()">
     <h3 id="modalTitle"></h3>
     <div class="modal-sub" id="modalSub"></div>
+    <a id="gmapLink" href="#" target="_blank" rel="noopener"
+       style="display:inline-block;margin-bottom:12px;padding:8px 14px;background:#4285F4;color:white;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
+      📍 Google Mapsで開く
+    </a>
     <div class="status-btns">
       <button class="status-btn" data-status="not_placed" onclick="selectStatus(this)">未設置<br><small>Not Placed</small></button>
       <button class="status-btn" data-status="placed" onclick="selectStatus(this)">設置済<br><small>Placed</small></button>
@@ -782,6 +786,7 @@ function openModal(arrowId) {
   document.getElementById('modalTitle').textContent = cat.icon + ' ' + arrow.name;
   document.getElementById('modalSub').textContent =
     cat.label + ' / 座標 Coords: ' + Number(arrow.lat).toFixed(5) + ', ' + Number(arrow.lng).toFixed(5);
+  document.getElementById('gmapLink').href = 'https://www.google.com/maps?q=' + arrow.lat + ',' + arrow.lng;
 
   // ステータスボタン
   document.querySelectorAll('.status-btn').forEach(btn => {
