@@ -277,7 +277,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
 // =============================================
 // 設定 — ★ここにGAS WebアプリURLを貼る★
 // =============================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbyzhonW2b9oDGNWZ1ZOZy0gwcYN-xPvk-ZvCO6ElJ7MuwmJtg4zQhA2Lgj_VEs9QqrA/exec';
+const API_URL = '';
 
 // =============================================
 // 2kmコース座標データ（KMLから抽出）
@@ -546,7 +546,10 @@ function openModal(volId) {
   const data = volData[volId] || { status:'not_placed', member_name:'', phone:'', shift:'morning', role:'誘導', admin_memo:v.memo, member_memo:'' };
 
   document.getElementById('modalTitle').textContent = '#' + v.num + (v.desc ? ' — ' + v.desc : '');
-  document.getElementById('modalArea').textContent = v.danger ? '⚠ 危険箇所 / Danger Point' : '誘導地点 / Guide Point';
+  const areaEl = document.getElementById('modalArea');
+  const gmapUrl = 'https://www.google.com/maps?q=' + v.lat + ',' + v.lng;
+  areaEl.innerHTML = (v.danger ? '⚠ 危険箇所 / Danger Point' : '誘導地点 / Guide Point') +
+    ' &nbsp;<a href="' + gmapUrl + '" target="_blank" rel="noopener" style="color:#1565c0;text-decoration:none;font-weight:600;">📍 Google Maps で開く</a>';
 
   const memoBox = document.getElementById('modalMemoBox');
   if (v.memo) {
