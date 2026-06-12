@@ -227,6 +227,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sa
   <div class="modal" onclick="event.stopPropagation()">
     <h3 id="modalTitle"></h3>
     <div class="modal-area" id="modalArea"></div>
+    <a id="gmapLink" href="#" target="_blank" rel="noopener"
+       style="display:inline-block;margin-bottom:12px;padding:8px 14px;background:#4285F4;color:white;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none;">
+      📍 Google Mapsで開く
+    </a>
     <div class="modal-runner-time" id="modalRunnerTime">
       <div class="label">ランナー予想通過時刻 / Expected Runner Passing Time</div>
       <div id="runnerTimeText"></div>
@@ -633,6 +637,9 @@ function openModal(volId) {
   document.getElementById('modalTitle').textContent = '#' + v.num + ' ' + v.area;
   const typeLabel = TYPE_LABELS[v.type] || v.type;
   document.getElementById('modalArea').textContent = 'タイプ: ' + typeLabel;
+
+  // Google Mapsリンク
+  document.getElementById('gmapLink').href = 'https://www.google.com/maps?q=' + v.lat + ',' + v.lng;
 
   // ランナー予想通過時刻（自動計算）
   const rtDiv = document.getElementById('modalRunnerTime');
