@@ -16,29 +16,13 @@ body {
 .header {
   background: linear-gradient(135deg, #1a5c2e 0%, #2e7d32 100%);
   color: white;
-  padding: 10px 16px 10px;
+  padding: 20px 16px 16px;
   text-align: center;
   position: sticky; top: 0; z-index: 100;
   box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-  display: flex; align-items: center; justify-content: center; gap: 12px;
 }
-.header-logo {
-  height: 44px; width: auto;
-  filter: brightness(0) invert(1);
-  flex-shrink: 0;
-}
-.header-text { text-align: left; }
-.header h1 { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; }
-.header-sub { font-size: 10px; opacity: 0.8; margin-top: 2px; }
-
-/* ========== HERO LOGO ========== */
-.hero-logo {
-  display: flex; justify-content: center; padding: 20px 0 8px;
-}
-.hero-logo img {
-  width: 120px; height: auto;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.12));
-}
+.header h1 { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+.header-sub { font-size: 11px; opacity: 0.8; margin-top: 3px; }
 
 /* ========== NAV TABS ========== */
 .nav-tabs {
@@ -191,11 +175,8 @@ body {
 
 <!-- Header -->
 <div class="header">
-  <img class="header-logo" src="https://drive.google.com/uc?export=view&id=1-TF22QvVWKbK3TuSsJ00_N2zNcJO2qcr" alt="春の陣ロゴ">
-  <div class="header-text">
-    <h1>越後まつだい 春の陣</h1>
-    <div class="header-sub">チームポータル — Niigata Trail Run</div>
-  </div>
+  <h1>🏔 越後まつだい 春の陣</h1>
+  <div class="header-sub">チームポータル — Niigata Trail Run</div>
 </div>
 
 <!-- Nav Tabs -->
@@ -210,10 +191,6 @@ body {
 <!-- ===== TAB: TOOLS ===== -->
 <div class="section active" id="tab-tools">
 
-  <div class="hero-logo">
-    <img src="https://drive.google.com/uc?export=view&id=1-TF22QvVWKbK3TuSsJ00_N2zNcJO2qcr" alt="越後まつだい春の陣ロゴ">
-  </div>
-
   <div class="card">
     <div class="card-header">
       <span class="icon">🛠</span>
@@ -221,7 +198,7 @@ body {
     </div>
     <div class="card-body">
       <div class="tool-grid">
-        <a href="index.html" class="tool-card tool-green">
+        <a href="mow.html" class="tool-card tool-green">
           <span class="tool-icon">🌿</span>
           <span class="tool-name">草刈り<br>区間管理</span>
         </a>
