@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>越後まつだい 春の陣 — チームポータル</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  background: #f4f6f4;
+  color: #1a1a1a;
+}
+
+/* ========== HEADER ========== */
+.header {
+  background: linear-gradient(135deg, #1a5c2e 0%, #2e7d32 100%);
+  color: white;
+  padding: 20px 16px 16px;
+  text-align: center;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+.header h1 { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
+.header-sub { font-size: 11px; opacity: 0.8; margin-top: 3px; }
+
+/* ========== NAV TABS ========== */
+.nav-tabs {
+  display: flex; overflow-x: auto; background: #fff;
+  border-bottom: 2px solid #e0e0e0;
+  -webkit-overflow-scrolling: touch;
+}
+.nav-tab {
+  flex-shrink: 0; padding: 10px 18px;
+  font-size: 13px; font-weight: 600; color: #666;
+  border: none; background: none; cursor: pointer;
+  border-bottom: 3px solid transparent; margin-bottom: -2px;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+.nav-tab.active { color: #1a5c2e; border-bottom-color: #1a5c2e; }
+
+/* ========== SECTIONS ========== */
+.section { display: none; padding: 16px; max-width: 640px; margin: 0 auto; }
+.section.active { display: block; }
+
+/* ========== CARDS ========== */
+.card {
+  background: white; border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  margin-bottom: 16px; overflow: hidden;
+}
+.card-header {
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.card-header .icon { font-size: 18px; }
+.card-header h2 { font-size: 14px; font-weight: 700; color: #1a5c2e; }
+.card-body { padding: 12px 16px; }
+
+/* ========== TOOL LINKS ========== */
+.tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.tool-card {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 16px 10px; border-radius: 10px;
+  text-decoration: none; color: white;
+  font-size: 12px; font-weight: 700; text-align: center;
+  min-height: 80px; gap: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: opacity 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tool-card:active { opacity: 0.85; transform: scale(0.97); }
+.tool-card .tool-icon { font-size: 24px; }
+.tool-card .tool-name { line-height: 1.3; }
+.tool-green { background: #1a5c2e; }
+.tool-orange { background: #e65100; }
+.tool-blue { background: #1565c0; }
+.tool-purple { background: #6a1b9a; }
+
+/* ========== DOCUMENT LINKS ========== */
+.doc-section-title {
+  font-size: 11px; font-weight: 700; color: #888;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 8px 0 4px; margin-top: 4px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.doc-section-title:first-child { padding-top: 0; margin-top: 0; }
+.doc-link {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 0; border-bottom: 1px solid #f8f8f8;
+  text-decoration: none; color: #1a1a1a;
+  -webkit-tap-highlight-color: transparent;
+}
+.doc-link:last-child { border-bottom: none; }
+.doc-link:active { opacity: 0.7; }
+.doc-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.doc-icon-pdf { background: #ffebee; }
+.doc-icon-sheet { background: #e8f5e9; }
+.doc-icon-doc { background: #e3f2fd; }
+.doc-icon-link { background: #f3e5f5; }
+.doc-info { flex: 1; }
+.doc-name { font-size: 13px; font-weight: 600; }
+.doc-meta { font-size: 11px; color: #888; margin-top: 2px; }
+.doc-arrow { color: #ccc; font-size: 16px; }
+
+/* ========== KNOWHOW / TEXT ========== */
+.knowhow-item {
+  border-left: 3px solid #1a5c2e;
+  padding: 8px 12px; margin-bottom: 12px;
+  background: #f9fbf9; border-radius: 0 6px 6px 0;
+}
+.knowhow-item h3 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+.knowhow-item p { font-size: 12px; color: #444; line-height: 1.6; }
+.knowhow-item ul { font-size: 12px; color: #444; line-height: 1.8; padding-left: 16px; margin-top: 4px; }
+.tag {
+  display: inline-block; font-size: 10px; padding: 2px 7px;
+  border-radius: 4px; margin-bottom: 6px; font-weight: 700;
+}
+.tag-important { background: #ffebee; color: #c62828; }
+.tag-info { background: #e3f2fd; color: #0d47a1; }
+.tag-tip { background: #e8f5e9; color: #2e7d32; }
+
+/* ========== MAP ========== */
+.map-wrapper {
+  border-radius: 10px; overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.map-wrapper iframe {
+  width: 100%; height: 300px; border: none; display: block;
+}
+.map-link {
+  display: block; text-align: center; padding: 12px;
+  background: #1a5c2e; color: white;
+  font-size: 13px; font-weight: 700;
+  text-decoration: none; border-radius: 8px;
+  margin-top: 10px;
+  -webkit-tap-highlight-color: transparent;
+}
+.map-link:active { opacity: 0.85; }
+
+/* ========== UPDATES ========== */
+.update-item {
+  display: flex; gap: 12px; padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.update-item:last-child { border-bottom: none; }
+.update-date {
+  font-size: 11px; color: #888; min-width: 70px; padding-top: 2px;
+}
+.update-body {}
+.update-title { font-size: 13px; font-weight: 600; }
+.update-detail { font-size: 11px; color: #666; margin-top: 2px; line-height: 1.5; }
+.badge {
+  display: inline-block; font-size: 10px; padding: 1px 6px;
+  border-radius: 3px; color: white; font-weight: 700; margin-left: 4px;
+}
+.badge-new { background: #d32f2f; }
+.badge-updated { background: #1565c0; }
+
+/* ========== FOOTER ========== */
+.footer {
+  text-align: center; padding: 24px 16px;
+  font-size: 11px; color: #aaa;
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>🏔 越後まつだい 春の陣</h1>
+  <div class="header-sub">チームポータル — Niigata Trail Run</div>
+</div>
+
+<!-- Nav Tabs -->
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showTab('tools')">🛠 ツール</button>
+  <button class="nav-tab" onclick="showTab('docs')">📄 書類</button>
+  <button class="nav-tab" onclick="showTab('knowhow')">📝 ノウハウ</button>
+  <button class="nav-tab" onclick="showTab('map')">📍 地図</button>
+  <button class="nav-tab" onclick="showTab('updates')">🕓 更新履歴</button>
+</div>
+
+<!-- ===== TAB: TOOLS ===== -->
+<div class="section active" id="tab-tools">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🛠</span>
+      <h2>管理ツール</h2>
+    </div>
+    <div class="card-body">
+      <div class="tool-grid">
+        <a href="index.html" class="tool-card tool-green">
+          <span class="tool-icon">🌿</span>
+          <span class="tool-name">草刈り<br>区間管理</span>
+        </a>
+        <a href="guidancevolunteer.html" class="tool-card tool-orange">
+          <span class="tool-icon">🙋</span>
+          <span class="tool-name">誘導人員<br>管理</span>
+        </a>
+        <a href="arrows.html" class="tool-card tool-blue">
+          <span class="tool-icon">🪧</span>
+          <span class="tool-name">矢印<br>管理</span>
+        </a>
+        <a href="kids.html" class="tool-card tool-purple">
+          <span class="tool-icon">🧒</span>
+          <span class="tool-name">キッズ<br>コース</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📋</span>
+      <h2>クイックリンク</h2>
+    </div>
+    <div class="card-body">
+      <a href="https://drive.google.com/drive/folders/XXXXXXXXXX" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-link">🗂</div>
+        <div class="doc-info">
+          <div class="doc-name">Google Drive — 全書類フォルダ</div>
+          <div class="doc-meta">申請書類・請求書・写真 など</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://www.google.com/maps/d/XXXXXXXXXX" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-link">🗺</div>
+        <div class="doc-info">
+          <div class="doc-name">Google マイマップ</div>
+          <div class="doc-meta">コース・エイド・集合場所</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: DOCS ===== -->
+<div class="section" id="tab-docs">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📄</span>
+      <h2>申請書類</h2>
+    </div>
+    <div class="card-body">
+      <!-- ★ ここのhrefを実際のGoogle DriveリンクURLに書き換えてください -->
+      <div class="doc-section-title">許可申請</div>
+      <a href="https://drive.google.com/file/d/XXXXXXXX/view" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-pdf">📕</div>
+        <div class="doc-info">
+          <div class="doc-name">林道使用許可申請書</div>
+          <div class="doc-meta">PDF — 提出先: 十日町市</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://drive.google.com/file/d/XXXXXXXX/view" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-pdf">📕</div>
+        <div class="doc-info">
+          <div class="doc-name">道路使用許可申請書</div>
+          <div class="doc-meta">PDF — 提出先: 新潟県十日町警察署</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://drive.google.com/file/d/XXXXXXXX/view" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-pdf">📕</div>
+        <div class="doc-info">
+          <div class="doc-name">公園占用許可申請書</div>
+          <div class="doc-meta">PDF</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+
+      <div class="doc-section-title">保険・安全</div>
+      <a href="https://drive.google.com/file/d/XXXXXXXX/view" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-pdf">📕</div>
+        <div class="doc-info">
+          <div class="doc-name">スポーツ安全保険 加入証明</div>
+          <div class="doc-meta">PDF</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://drive.google.com/file/d/XXXXXXXX/view" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-pdf">📕</div>
+        <div class="doc-info">
+          <div class="doc-name">救急対応マニュアル</div>
+          <div class="doc-meta">PDF</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">💴</span>
+      <h2>請求書・領収書</h2>
+    </div>
+    <div class="card-body">
+      <a href="https://drive.google.com/drive/folders/XXXXXXXX" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-sheet">📗</div>
+        <div class="doc-info">
+          <div class="doc-name">収支管理スプレッドシート</div>
+          <div class="doc-meta">Google スプレッドシート</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://drive.google.com/file/d/XXXXXXXX/view" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-pdf">📕</div>
+        <div class="doc-info">
+          <div class="doc-name">請求書フォルダ</div>
+          <div class="doc-meta">Google Drive フォルダ</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📎</span>
+      <h2>その他資料</h2>
+    </div>
+    <div class="card-body">
+      <a href="https://drive.google.com/file/d/XXXXXXXX/view" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-doc">📘</div>
+        <div class="doc-info">
+          <div class="doc-name">大会要項</div>
+          <div class="doc-meta">PDF</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://drive.google.com/file/d/XXXXXXXX/view" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-doc">📘</div>
+        <div class="doc-info">
+          <div class="doc-name">ボランティアマニュアル</div>
+          <div class="doc-meta">PDF</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://drive.google.com/file/d/XXXXXXXX/view" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-doc">📘</div>
+        <div class="doc-info">
+          <div class="doc-name">コースマップ（印刷用）</div>
+          <div class="doc-meta">PDF — A4対応</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: KNOWHOW ===== -->
+<div class="section" id="tab-knowhow">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🌿</span>
+      <h2>草刈り作業</h2>
+    </div>
+    <div class="card-body">
+      <div class="knowhow-item">
+        <span class="tag tag-important">重要</span>
+        <h3>作業前の確認事項</h3>
+        <ul>
+          <li>保険加入証明書を携帯すること</li>
+          <li>天気予報を確認し、雨天強風時は中止</li>
+          <li>携帯電話・水・救急セットを持参</li>
+          <li>2名以上で作業すること（単独禁止）</li>
+        </ul>
+      </div>
+      <div class="knowhow-item">
+        <span class="tag tag-info">手順</span>
+        <h3>ステータス更新の仕方</h3>
+        <p>草刈り管理ツールを開き、地図上の区間（色付きライン）をタップ。ステータスを「作業中」→「完了」に変更し、作業者名・日付を入力して「保存する」を押す。</p>
+      </div>
+      <div class="knowhow-item">
+        <span class="tag tag-tip">ヒント</span>
+        <h3>エリア別の注意点</h3>
+        <ul>
+          <li>会沢・蓬平: 傾斜が急なため滑り止め必携</li>
+          <li>池尻: クモの巣が多い（早朝は特に注意）</li>
+          <li>松代城周辺: 観光客がいる場合は誘導しながら作業</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🪜</span>
+      <h2>階段・ロープ整備</h2>
+    </div>
+    <div class="card-body">
+      <div class="knowhow-item">
+        <span class="tag tag-important">重要</span>
+        <h3>ロープ設置の基準</h3>
+        <ul>
+          <li>傾斜30度以上の区間に太ロープ（直径12mm以上）</li>
+          <li>タイガーロープは補助として使用可</li>
+          <li>固定は木の根元・杭を使用（立木への直接結束は根元のみ）</li>
+        </ul>
+      </div>
+      <div class="knowhow-item">
+        <span class="tag tag-info">手順</span>
+        <h3>Ikejiri_Entrance（池尻入口）について</h3>
+        <p>大型階段あり。太ロープ×2 + タイガーロープ×2が設置済み。降り口の角度が特に急なため、ランナー体験者によるレビュー必須。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🙋</span>
+      <h2>誘導ボランティア</h2>
+    </div>
+    <div class="card-body">
+      <div class="knowhow-item">
+        <span class="tag tag-info">手順</span>
+        <h3>当日の配置確認</h3>
+        <p>誘導人員管理ツールで各ポイントをタップし、メンバー名を入力して「配置済み」に変更する。撤収後も必ず「撤収済み」に更新すること。</p>
+      </div>
+      <div class="knowhow-item">
+        <span class="tag tag-tip">ヒント</span>
+        <h3>ランナー通過予想時刻</h3>
+        <p>各誘導ポイントをタップすると先頭〜最後尾の通過予想時刻が表示される。配置時間の目安として活用すること。</p>
+      </div>
+      <div class="knowhow-item">
+        <span class="tag tag-important">注意</span>
+        <h3>必須ポイント (#1〜#12)</h3>
+        <p>必須ポイントは1人でも欠員が出た場合、大会前日に緊急連絡あり。代替要員リストを必ず確認しておくこと。</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📋</span>
+      <h2>申請書類 提出ノウハウ</h2>
+    </div>
+    <div class="card-body">
+      <div class="knowhow-item">
+        <span class="tag tag-info">スケジュール</span>
+        <h3>提出タイムライン（目安）</h3>
+        <ul>
+          <li>大会の3ヶ月前: 道路使用許可申請（警察署）</li>
+          <li>大会の2ヶ月前: 林道使用許可申請（市役所）</li>
+          <li>大会の6週前: スポーツ保険加入完了</li>
+          <li>大会の1ヶ月前: 各書類コピーをDriveにアップ</li>
+        </ul>
+      </div>
+      <div class="knowhow-item">
+        <span class="tag tag-tip">ヒント</span>
+        <h3>書類アップロードのルール</h3>
+        <ul>
+          <li>ファイル名: 日付_書類名（例: 20260401_林道使用許可申請書.pdf）</li>
+          <li>提出済みの書類はフォルダ「提出済み」に移動</li>
+          <li>許可証が届いたら必ずスキャンしてDriveに保存</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: MAP ===== -->
+<div class="section" id="tab-map">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🏁</span>
+      <h2>スタート・ゴール（松代城）</h2>
+    </div>
+    <div class="card-body">
+      <div class="map-wrapper">
+        <!-- 松代城付近の Google Maps 埋め込み -->
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3202.4!2d138.6151!3d37.1321!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5ff4d0b6d3e1c1a5%3A0x1234567890abcdef!2z5p2x5Luj5Z-O!5e0!3m2!1sja!2sjp!4v1234567890"
+          allowfullscreen="" loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+      </div>
+      <a href="https://maps.app.goo.gl/matsudaicastle" target="_blank" rel="noopener" class="map-link">
+        📍 Google Maps で開く
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">⛽</span>
+      <h2>エイドステーション</h2>
+    </div>
+    <div class="card-body">
+      <a href="https://www.google.com/maps?q=37.1481,138.6101" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-link">⛽</div>
+        <div class="doc-info">
+          <div class="doc-name">Aid Station 1</div>
+          <div class="doc-meta">37.1481, 138.6101</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://www.google.com/maps?q=37.1378,138.5793" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-link">⛽</div>
+        <div class="doc-info">
+          <div class="doc-name">Aid Station 2</div>
+          <div class="doc-meta">37.1378, 138.5793</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://www.google.com/maps?q=37.1179,138.5919" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-link">⛽</div>
+        <div class="doc-info">
+          <div class="doc-name">Aid Station 3</div>
+          <div class="doc-meta">37.1179, 138.5919</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🧭</span>
+      <h2>その他の場所</h2>
+    </div>
+    <div class="card-body">
+      <a href="https://maps.app.goo.gl/matsudai_station" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-link">🚃</div>
+        <div class="doc-info">
+          <div class="doc-name">まつだい駅（最寄り駅）</div>
+          <div class="doc-meta">北越急行ほくほく線</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+      <a href="https://maps.app.goo.gl/matsudai_parking" target="_blank" rel="noopener" class="doc-link">
+        <div class="doc-icon doc-icon-link">🅿️</div>
+        <div class="doc-info">
+          <div class="doc-name">駐車場（スタッフ用）</div>
+          <div class="doc-meta">大会当日 スタッフ専用エリア</div>
+        </div>
+        <div class="doc-arrow">›</div>
+      </a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ===== TAB: UPDATES ===== -->
+<div class="section" id="tab-updates">
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🕓</span>
+      <h2>更新履歴</h2>
+    </div>
+    <div class="card-body">
+      <!-- 新しい更新を上に追加してください -->
+      <div class="update-item">
+        <div class="update-date">2026-06-22</div>
+        <div class="update-body">
+          <div class="update-title">チームポータル開設 <span class="badge badge-new">NEW</span></div>
+          <div class="update-detail">書類リンク集・ノウハウ・地図をまとめたポータルページを追加しました。</div>
+        </div>
+      </div>
+      <div class="update-item">
+        <div class="update-date">2026-06-01</div>
+        <div class="update-body">
+          <div class="update-title">誘導人員管理ツール追加</div>
+          <div class="update-detail">guidancevolunteer.html を追加。ランナー通過予想時刻の自動計算機能付き。</div>
+        </div>
+      </div>
+      <div class="update-item">
+        <div class="update-date">2026-05-15</div>
+        <div class="update-body">
+          <div class="update-title">草刈り管理ツール 階段ポイント追加 <span class="badge badge-updated">更新</span></div>
+          <div class="update-detail">階段・ロープ12ポイントをマップ上に追加。ステータス管理に対応。</div>
+        </div>
+      </div>
+      <div class="update-item">
+        <div class="update-date">2026-05-01</div>
+        <div class="update-body">
+          <div class="update-title">草刈り管理ツール公開</div>
+          <div class="update-detail">index.html として25区間の草刈り進捗管理ツールを公開。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">📌</span>
+      <h2>お知らせ・ToDo</h2>
+    </div>
+    <div class="card-body">
+      <!-- ここに当面のToDo・メモを追記する -->
+      <div class="knowhow-item">
+        <span class="tag tag-important">未完了</span>
+        <h3>Googleドライブリンクの設定</h3>
+        <p>「書類」タブの各リンク（XXXXXXXX）を実際のGoogle DriveファイルIDに書き換えてください。</p>
+      </div>
+      <div class="knowhow-item">
+        <span class="tag tag-important">未完了</span>
+        <h3>Google Maps埋め込みURLの設定</h3>
+        <p>「地図」タブのiframe src URL を実際の埋め込みURLに書き換えてください。</p>
+      </div>
+      <div class="knowhow-item">
+        <span class="tag tag-tip">完了</span>
+        <h3>草刈り全区間 ステータス入力</h3>
+        <p>草刈り管理ツールにて全25区間の初期ステータスを入力済み。</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  越後まつだい 春の陣 チームポータル<br>
+  <a href="https://github.com/NaobumiTanaka/harunojin" target="_blank" rel="noopener" style="color:#aaa;">github.com/NaobumiTanaka/harunojin</a>
+</div>
+
+<script>
+function showTab(name) {
+  // sections
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  // tabs
+  document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  // scroll to top
+  window.scrollTo({ top: 0 });
+}
+</script>
+
+</body>
+</html>
