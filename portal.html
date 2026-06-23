@@ -4,434 +4,499 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>越後まつだい 春の陣 — チームポータル</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
+:root {
+  --bg:      #F5F5F5;
+  --card:    #FFFFFF;
+  --text:    #202020;
+  --sub:     #777777;
+  --border:  #DDDDDD;
+  --accent:  #222222;
+  --icon:    #555555;
+  --muted:   #F0F0F0;
+  --shadow:  0 1px 3px rgba(0,0,0,0.06), 0 2px 10px rgba(0,0,0,0.04);
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
-  background: #f4f6f4;
-  color: #1a1a1a;
+  font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ========== HEADER ========== */
+/* ── HEADER ── */
 .header {
-  background: linear-gradient(135deg, #1a5c2e 0%, #2e7d32 100%);
+  background: #111;
   color: white;
-  padding: 20px 16px 16px;
-  text-align: center;
+  padding: 13px 18px;
+  display: flex; align-items: center; gap: 10px;
   position: sticky; top: 0; z-index: 100;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  border-bottom: 1px solid #2a2a2a;
 }
-.header h1 { font-size: 18px; font-weight: 800; letter-spacing: 0.5px; }
-.header-sub { font-size: 11px; opacity: 0.8; margin-top: 3px; }
+.header-logo-icon { color: rgba(255,255,255,0.5); flex-shrink: 0; }
+.header-text h1 { font-size: 14px; font-weight: 700; color: white; letter-spacing: -0.2px; }
+.header-text .sub { font-size: 10px; color: #888; margin-top: 1px; }
 
-/* ========== NAV TABS ========== */
+/* ── NAV ── */
 .nav-tabs {
-  display: flex; overflow-x: auto; background: #fff;
-  border-bottom: 2px solid #e0e0e0;
+  display: flex; overflow-x: auto; background: var(--card);
+  border-bottom: 1px solid var(--border);
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.nav-tabs::-webkit-scrollbar { display: none; }
 .nav-tab {
-  flex-shrink: 0; padding: 10px 18px;
-  font-size: 13px; font-weight: 600; color: #666;
+  flex-shrink: 0; padding: 11px 16px;
+  font-size: 12px; font-weight: 500; color: var(--sub);
   border: none; background: none; cursor: pointer;
-  border-bottom: 3px solid transparent; margin-bottom: -2px;
-  white-space: nowrap;
-  transition: color 0.2s;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  white-space: nowrap; display: flex; align-items: center; gap: 5px;
+  transition: color 0.15s, background 0.12s;
+  -webkit-tap-highlight-color: transparent;
 }
-.nav-tab.active { color: #1a5c2e; border-bottom-color: #1a5c2e; }
+.nav-tab:hover { color: var(--text); background: #F9F9F9; }
+.nav-tab.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+.nav-tab svg { width: 14px; height: 14px; }
 
-/* ========== SECTIONS ========== */
-.section { display: none; padding: 16px; max-width: 640px; margin: 0 auto; }
+/* ── SECTION ── */
+.section { display: none; padding: 20px 16px 40px; max-width: 640px; margin: 0 auto; }
 .section.active { display: block; }
 
-/* ========== CARDS ========== */
+/* ── CARD ── */
 .card {
-  background: white; border-radius: 12px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
-  margin-bottom: 16px; overflow: hidden;
+  background: var(--card);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  margin-bottom: 14px;
+  overflow: hidden;
 }
 .card-header {
-  padding: 12px 16px;
-  display: flex; align-items: center; gap: 8px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 13px 16px 11px;
+  display: flex; align-items: center; gap: 9px;
+  border-bottom: 1px solid var(--border);
 }
-.card-header .icon { font-size: 18px; }
-.card-header h2 { font-size: 14px; font-weight: 700; color: #1a5c2e; }
-.card-body { padding: 12px 16px; }
+.card-header svg { color: var(--icon); flex-shrink: 0; }
+.card-header h2 { font-size: 13px; font-weight: 700; color: var(--text); }
 
-/* ========== TOOL LINKS ========== */
-.tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+/* ── TOOL GRID ── */
+.tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px; }
 .tool-card {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  padding: 16px 10px; border-radius: 10px;
-  text-decoration: none; color: white;
-  font-size: 12px; font-weight: 700; text-align: center;
-  min-height: 80px; gap: 6px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  transition: opacity 0.15s, transform 0.15s;
+  display: flex; flex-direction: column; align-items: flex-start;
+  padding: 14px; border-radius: 8px;
+  background: var(--accent); text-decoration: none;
+  gap: 10px; min-height: 86px;
+  transition: background 0.15s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
-.tool-card:active { opacity: 0.85; transform: scale(0.97); }
-.tool-card .tool-icon { font-size: 24px; }
-.tool-card .tool-name { line-height: 1.3; }
-.tool-green { background: #1a5c2e; }
-.tool-orange { background: #e65100; }
-.tool-blue { background: #1565c0; }
-.tool-purple { background: #6a1b9a; }
+.tool-card:hover { background: #333; }
+.tool-card:active { transform: scale(0.96); background: #444; }
+.tool-card svg { color: rgba(255,255,255,0.7); }
+.tool-card-label { font-size: 12px; font-weight: 600; color: white; line-height: 1.35; }
+.tool-card-sub { font-size: 10px; color: rgba(255,255,255,0.45); margin-top: -6px; }
 
-/* ========== DOCUMENT LINKS ========== */
-.doc-section-title {
-  font-size: 11px; font-weight: 700; color: #888;
+/* ── QUICK LINKS ── */
+.qlink {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-top: 1px solid var(--border);
+  text-decoration: none; color: var(--text);
+  transition: background 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.qlink:first-child { border-top: none; }
+.qlink:hover { background: #FAFAFA; }
+.qlink-icon { width: 34px; height: 34px; border-radius: 7px; background: var(--muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.qlink-icon svg { color: var(--icon); }
+.qlink-info { flex: 1; }
+.qlink-name { font-size: 13px; font-weight: 500; }
+.qlink-sub { font-size: 11px; color: var(--sub); margin-top: 1px; }
+.qlink-arrow { color: var(--border); font-size: 18px; }
+
+/* ── DOC LINKS ── */
+.doc-group-label {
+  font-size: 10px; font-weight: 600; color: var(--sub);
   text-transform: uppercase; letter-spacing: 0.5px;
-  padding: 8px 0 4px; margin-top: 4px;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 16px 5px;
 }
-.doc-section-title:first-child { padding-top: 0; margin-top: 0; }
 .doc-link {
-  display: flex; align-items: center; gap: 10px;
-  padding: 11px 0; border-bottom: 1px solid #f8f8f8;
-  text-decoration: none; color: #1a1a1a;
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; border-top: 1px solid var(--border);
+  text-decoration: none; color: var(--text);
+  transition: background 0.12s;
   -webkit-tap-highlight-color: transparent;
 }
-.doc-link:last-child { border-bottom: none; }
-.doc-link:active { opacity: 0.7; }
-.doc-icon {
-  width: 36px; height: 36px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; flex-shrink: 0;
-}
-.doc-icon-pdf { background: #ffebee; }
-.doc-icon-sheet { background: #e8f5e9; }
-.doc-icon-doc { background: #e3f2fd; }
-.doc-icon-link { background: #f3e5f5; }
-.doc-icon-img { background: #fff8e1; }
-.doc-info { flex: 1; }
-.doc-name { font-size: 13px; font-weight: 600; }
-.doc-meta { font-size: 11px; color: #888; margin-top: 2px; }
-.doc-arrow { color: #ccc; font-size: 16px; }
+.doc-link:first-of-type { border-top: none; }
+.doc-link:hover { background: #FAFAFA; }
+.doc-icon { width: 34px; height: 34px; border-radius: 7px; background: var(--muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.doc-icon svg { color: var(--icon); }
+.doc-info { flex: 1; min-width: 0; }
+.doc-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-meta { font-size: 11px; color: var(--sub); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.doc-arrow { color: var(--border); font-size: 18px; }
 
-/* ========== KNOWHOW / TEXT ========== */
-.knowhow-item {
-  border-left: 3px solid #1a5c2e;
-  padding: 8px 12px; margin-bottom: 12px;
-  background: #f9fbf9; border-radius: 0 6px 6px 0;
+/* ── KNOWHOW ── */
+.kh-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.kh-item {
+  border-left: 2px solid var(--border);
+  padding: 9px 13px;
+  background: #FAFAFA;
+  border-radius: 0 7px 7px 0;
 }
-.knowhow-item h3 { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
-.knowhow-item p { font-size: 12px; color: #444; line-height: 1.6; }
-.knowhow-item ul { font-size: 12px; color: #444; line-height: 1.8; padding-left: 16px; margin-top: 4px; }
+.kh-item h3 { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: var(--text); }
+.kh-item p, .kh-item li { font-size: 12px; color: #555; line-height: 1.7; }
+.kh-item ul { padding-left: 15px; margin-top: 3px; }
+
 .tag {
-  display: inline-block; font-size: 10px; padding: 2px 7px;
-  border-radius: 4px; margin-bottom: 6px; font-weight: 700;
+  display: inline-block; font-size: 10px; font-weight: 600;
+  padding: 2px 7px; border-radius: 4px; margin-bottom: 5px;
+  letter-spacing: 0.1px;
 }
-.tag-important { background: #ffebee; color: #c62828; }
-.tag-info { background: #e3f2fd; color: #0d47a1; }
-.tag-tip { background: #e8f5e9; color: #2e7d32; }
+.tag-important { background: #202020; color: white; }
+.tag-info      { background: #555555; color: white; }
+.tag-tip       { background: var(--muted); color: var(--text); }
 
-/* ========== MAP ========== */
-.map-wrapper {
-  border-radius: 10px; overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
-}
-.map-wrapper iframe {
-  width: 100%; height: 300px; border: none; display: block;
-}
-.map-link {
-  display: block; text-align: center; padding: 12px;
-  background: #1a5c2e; color: white;
-  font-size: 13px; font-weight: 700;
-  text-decoration: none; border-radius: 8px;
-  margin-top: 10px;
+/* ── MAP ── */
+.map-wrap { margin: 14px 16px 10px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); }
+.map-wrap iframe { width: 100%; height: 280px; border: none; display: block; }
+.map-btn {
+  display: block; text-align: center; padding: 11px;
+  background: var(--accent); color: white;
+  font-size: 13px; font-weight: 600;
+  text-decoration: none; border-radius: 7px;
+  margin: 0 16px 14px;
+  transition: background 0.15s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
-.map-link:active { opacity: 0.85; }
+.map-btn:hover { background: #333; }
+.map-btn:active { transform: scale(0.98); }
 
-/* ========== UPDATES ========== */
-.update-item {
-  display: flex; gap: 12px; padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+/* ── AID / LOCATION LINKS ── */
+.loc-link {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 16px; border-top: 1px solid var(--border);
+  text-decoration: none; color: var(--text);
+  transition: background 0.12s;
 }
-.update-item:last-child { border-bottom: none; }
-.update-date {
-  font-size: 11px; color: #888; min-width: 70px; padding-top: 2px;
-}
-.update-body {}
-.update-title { font-size: 13px; font-weight: 600; }
-.update-detail { font-size: 11px; color: #666; margin-top: 2px; line-height: 1.5; }
-.badge {
-  display: inline-block; font-size: 10px; padding: 1px 6px;
-  border-radius: 3px; color: white; font-weight: 700; margin-left: 4px;
-}
-.badge-new { background: #d32f2f; }
-.badge-updated { background: #1565c0; }
+.loc-link:first-child { border-top: none; }
+.loc-link:hover { background: #FAFAFA; }
+.loc-icon { width: 34px; height: 34px; border-radius: 7px; background: var(--muted); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.loc-icon svg { color: var(--icon); }
+.loc-info { flex: 1; }
+.loc-name { font-size: 13px; font-weight: 500; }
+.loc-sub { font-size: 11px; color: var(--sub); margin-top: 1px; }
+.loc-arrow { color: var(--border); font-size: 18px; }
 
-/* ========== FOOTER ========== */
-.footer {
-  text-align: center; padding: 24px 16px;
-  font-size: 11px; color: #aaa;
+/* ── UPDATES ── */
+.upd-item {
+  display: flex; gap: 14px; padding: 12px 16px;
+  border-top: 1px solid var(--border);
 }
+.upd-item:first-child { border-top: none; }
+.upd-date { font-size: 11px; color: var(--sub); min-width: 70px; padding-top: 2px; flex-shrink: 0; }
+.upd-title { font-size: 13px; font-weight: 600; }
+.upd-detail { font-size: 11px; color: var(--sub); margin-top: 3px; line-height: 1.55; }
+.badge { display: inline-block; font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 3px; margin-left: 5px; vertical-align: middle; }
+.badge-new     { background: #202020; color: white; }
+.badge-updated { background: #555; color: white; }
+
+/* ── FOOTER ── */
+.footer { text-align: center; padding: 28px 16px; font-size: 11px; color: #bbb; }
+.footer a { color: #bbb; text-decoration: none; }
 </style>
 </head>
 <body>
 
-<!-- Header -->
+<!-- ══ HEADER ══ -->
 <div class="header">
-  <h1>🏔 越後まつだい 春の陣</h1>
-  <div class="header-sub">チームポータル — Niigata Trail Run</div>
+  <div class="header-logo-icon">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 17l4-8 4 4 4-6 4 10"/><path d="M3 21h18"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1>越後まつだい 春の陣</h1>
+    <div class="sub">チームポータル — Niigata Trail Run</div>
+  </div>
 </div>
 
-<!-- Nav Tabs -->
+<!-- ══ NAV ══ -->
 <div class="nav-tabs">
-  <button class="nav-tab active" onclick="showTab('tools')">🛠 ツール</button>
-  <button class="nav-tab" onclick="showTab('docs')">📄 書類</button>
-  <button class="nav-tab" onclick="showTab('knowhow')">📝 ノウハウ</button>
-  <button class="nav-tab" onclick="showTab('map')">📍 地図</button>
-  <button class="nav-tab" onclick="showTab('updates')">🕓 更新履歴</button>
+  <button class="nav-tab active" onclick="showTab('tools', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    ツール
+  </button>
+  <button class="nav-tab" onclick="showTab('docs', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+    書類
+  </button>
+  <button class="nav-tab" onclick="showTab('knowhow', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    ノウハウ
+  </button>
+  <button class="nav-tab" onclick="showTab('map', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 14 8 14s8-8.75 8-14a8 8 0 0 0-8-8z"/></svg>
+    地図
+  </button>
+  <button class="nav-tab" onclick="showTab('updates', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    更新履歴
+  </button>
 </div>
 
-<!-- ===== TAB: TOOLS ===== -->
+<!-- ══════════════════════════════════
+     TAB: TOOLS
+══════════════════════════════════ -->
 <div class="section active" id="tab-tools">
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">🛠</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
       <h2>管理ツール</h2>
     </div>
-    <div class="card-body">
-      <div class="tool-grid">
-        <a href="mow.html" class="tool-card tool-green">
-          <span class="tool-icon">🌿</span>
-          <span class="tool-name">草刈り<br>区間管理</span>
-        </a>
-        <a href="guidancevolunteer.html" class="tool-card tool-orange">
-          <span class="tool-icon">🙋</span>
-          <span class="tool-name">誘導人員<br>管理</span>
-        </a>
-        <a href="arrows.html" class="tool-card tool-blue">
-          <span class="tool-icon">🪧</span>
-          <span class="tool-name">矢印<br>管理</span>
-        </a>
-        <a href="kids.html" class="tool-card tool-purple">
-          <span class="tool-icon">🧒</span>
-          <span class="tool-name">キッズ<br>コース</span>
-        </a>
-      </div>
+    <div class="tool-grid">
+      <a href="mow.html" class="tool-card">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
+        <div>
+          <div class="tool-card-label">草刈り区間管理</div>
+          <div class="tool-card-sub">mow.html</div>
+        </div>
+      </a>
+      <a href="guidancevolunteer.html" class="tool-card">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <div>
+          <div class="tool-card-label">誘導人員管理</div>
+          <div class="tool-card-sub">guidancevolunteer.html</div>
+        </div>
+      </a>
+      <a href="arrows.html" class="tool-card">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        <div>
+          <div class="tool-card-label">矢印管理</div>
+          <div class="tool-card-sub">arrows.html</div>
+        </div>
+      </a>
+      <a href="kids.html" class="tool-card">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div>
+          <div class="tool-card-label">キッズコース</div>
+          <div class="tool-card-sub">kids.html</div>
+        </div>
+      </a>
     </div>
   </div>
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">📋</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       <h2>クイックリンク</h2>
     </div>
-    <div class="card-body">
-      <a href="https://drive.google.com/drive/folders/XXXXXXXXXX" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-link">🗂</div>
-        <div class="doc-info">
-          <div class="doc-name">Google Drive — 全書類フォルダ</div>
-          <div class="doc-meta">申請書類・請求書・写真 など</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://www.google.com/maps/d/XXXXXXXXXX" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-link">🗺</div>
-        <div class="doc-info">
-          <div class="doc-name">Google マイマップ</div>
-          <div class="doc-meta">コース・エイド・集合場所</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-    </div>
+    <a href="https://drive.google.com/drive/folders/XXXXXXXXXX" target="_blank" rel="noopener" class="qlink">
+      <div class="qlink-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <div class="qlink-info">
+        <div class="qlink-name">Google Drive — 全書類フォルダ</div>
+        <div class="qlink-sub">申請書類・請求書・写真など</div>
+      </div>
+      <div class="qlink-arrow">›</div>
+    </a>
+    <a href="https://www.google.com/maps/d/XXXXXXXXXX" target="_blank" rel="noopener" class="qlink">
+      <div class="qlink-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+      </div>
+      <div class="qlink-info">
+        <div class="qlink-name">Google マイマップ</div>
+        <div class="qlink-sub">コース・エイド・集合場所</div>
+      </div>
+      <div class="qlink-arrow">›</div>
+    </a>
   </div>
 
 </div>
 
-<!-- ===== TAB: DOCS ===== -->
+<!-- ══════════════════════════════════
+     TAB: DOCS
+══════════════════════════════════ -->
 <div class="section" id="tab-docs">
 
   <!-- 申請・許可 -->
   <div class="card">
     <div class="card-header">
-      <span class="icon">📋</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg>
       <h2>申請・許可</h2>
     </div>
-    <div class="card-body">
-      <a href="https://drive.google.com/open?id=1R_ROlah4i835W2Qge-gBSMxPbZJ0u6Bq&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">後援申請2026</div>
-          <div class="doc-meta">越後まつだい春の陣_後援申請2026.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://drive.google.com/open?id=1njQrMWbBNepbpliPSuqfQJLcd1o1Dzfj&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">施設使用申請願（高校）</div>
-          <div class="doc-meta">越後まつだい春の陣_施設使用申請願（高校）.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://drive.google.com/open?id=1LmOvipOV5iGutDqPSN2au39LHBvh4ihL&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">施設使用申請願（保育園）</div>
-          <div class="doc-meta">越後まつだい春の陣_施設使用申請願（保育園）.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://drive.google.com/open?id=12dYLrDRHT1DWxc-ZZgIgk-tbGGdokggZ&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">道路占用許可申請書（支所提出）</div>
-          <div class="doc-meta">道路占用許可申請書_越後まつだい春の陣2026_支所提出.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-    </div>
+    <a href="https://drive.google.com/open?id=1R_ROlah4i835W2Qge-gBSMxPbZJ0u6Bq&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">後援申請2026</div>
+        <div class="doc-meta">越後まつだい春の陣_後援申請2026.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+    <a href="https://drive.google.com/open?id=1njQrMWbBNepbpliPSuqfQJLcd1o1Dzfj&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">施設使用申請願（高校）</div>
+        <div class="doc-meta">越後まつだい春の陣_施設使用申請願（高校）.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+    <a href="https://drive.google.com/open?id=1LmOvipOV5iGutDqPSN2au39LHBvh4ihL&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">施設使用申請願（保育園）</div>
+        <div class="doc-meta">越後まつだい春の陣_施設使用申請願（保育園）.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+    <a href="https://drive.google.com/open?id=12dYLrDRHT1DWxc-ZZgIgk-tbGGdokggZ&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">道路占用許可申請書（支所提出）</div>
+        <div class="doc-meta">道路占用許可申請書_越後まつだい春の陣2026_支所提出.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
   </div>
 
   <!-- 大会運営 -->
   <div class="card">
     <div class="card-header">
-      <span class="icon">🏃</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
       <h2>大会運営</h2>
     </div>
-    <div class="card-body">
-      <a href="https://drive.google.com/open?id=1BRPT-m9YtSGM6aaugi3oZBHoYaIdNUQ7&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">参加案内</div>
-          <div class="doc-meta">越後まつだい春の陣2026_参加案内_9.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://drive.google.com/open?id=1OAUS6fuGNCvG5qwBaDXxUOSPIr3-KG-W&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">ボランティア運営マニュアル</div>
-          <div class="doc-meta">越後松代_ボランティア運営マニュアル_3.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://drive.google.com/open?id=1tq4iiuEPYCe3rg10mOqrkCSzRmdZdE85&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">クマ対策ガイドライン</div>
-          <div class="doc-meta">春の陣_クマ対策ガイドライン_ver2.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-    </div>
+    <a href="https://drive.google.com/open?id=1BRPT-m9YtSGM6aaugi3oZBHoYaIdNUQ7&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">参加案内</div>
+        <div class="doc-meta">越後まつだい春の陣2026_参加案内_9.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+    <a href="https://drive.google.com/open?id=1OAUS6fuGNCvG5qwBaDXxUOSPIr3-KG-W&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">ボランティア運営マニュアル</div>
+        <div class="doc-meta">越後松代_ボランティア運営マニュアル_3.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+    <a href="https://drive.google.com/open?id=1tq4iiuEPYCe3rg10mOqrkCSzRmdZdE85&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">クマ対策ガイドライン</div>
+        <div class="doc-meta">春の陣_クマ対策ガイドライン_ver2.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
   </div>
 
   <!-- ボランティア・高校生 -->
   <div class="card">
     <div class="card-header">
-      <span class="icon">🎓</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <h2>ボランティア・高校生</h2>
     </div>
-    <div class="card-body">
-      <a href="https://drive.google.com/open?id=15t42TS5hwOHtl_9AreP_8RHdgq9bgSQd&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">高校生ボランティア募集企画書</div>
-          <div class="doc-meta">越後まつだい春の陣_高校生ボランティア募集企画書ver2_dl.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://drive.google.com/open?id=1W0P1hOXNjW09hxrB1sP8h1epjdUOcuxD&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-img">🖼️</div>
-        <div class="doc-info">
-          <div class="doc-name">高校生向けボランティアポスター</div>
-          <div class="doc-meta">春の陣_高校生向けボラポスター.png</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-    </div>
+    <a href="https://drive.google.com/open?id=15t42TS5hwOHtl_9AreP_8RHdgq9bgSQd&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">高校生ボランティア募集企画書</div>
+        <div class="doc-meta">越後まつだい春の陣_高校生ボランティア募集企画書ver2_dl.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+    <a href="https://drive.google.com/open?id=1W0P1hOXNjW09hxrB1sP8h1epjdUOcuxD&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">高校生向けボランティアポスター</div>
+        <div class="doc-meta">春の陣_高校生向けボラポスター.png</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
   </div>
 
   <!-- 広報・地域 -->
   <div class="card">
     <div class="card-header">
-      <span class="icon">📢</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
       <h2>広報・地域</h2>
     </div>
-    <div class="card-body">
-      <a href="https://drive.google.com/open?id=1Xw4sc2Ebm4l2Y79kNsJWAgfK9gZ4gVpm&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">プレスリリース2026</div>
-          <div class="doc-meta">春の陣_プレスリリース2026.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://drive.google.com/open?id=1uFguvWZxQVzIF3-_kvwCO4gFBuBNa105&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-doc">📘</div>
-        <div class="doc-info">
-          <div class="doc-name">蒲生集落向けお知らせ</div>
-          <div class="doc-meta">蒲生集落向け_越後まつだい春の陣_お知らせ2.docx</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-    </div>
+    <a href="https://drive.google.com/open?id=1Xw4sc2Ebm4l2Y79kNsJWAgfK9gZ4gVpm&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">プレスリリース2026</div>
+        <div class="doc-meta">春の陣_プレスリリース2026.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+    <a href="https://drive.google.com/open?id=1uFguvWZxQVzIF3-_kvwCO4gFBuBNa105&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">蒲生集落向けお知らせ</div>
+        <div class="doc-meta">蒲生集落向け_越後まつだい春の陣_お知らせ2.docx</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
   </div>
 
   <!-- マップ・地図 -->
   <div class="card">
     <div class="card-header">
-      <span class="icon">🗺</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
       <h2>マップ・地図</h2>
     </div>
-    <div class="card-body">
-      <a href="https://drive.google.com/open?id=1OPbcHFBi9WfBj7dxxd0_EuonBGilMD7o&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-img">🖼️</div>
-        <div class="doc-info">
-          <div class="doc-name">駐車場マップ</div>
-          <div class="doc-meta">トレラン駐車場マップ春の陣2026.png</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://drive.google.com/open?id=1KpvazvDMjIIw06scS95R9FYlhree26HW&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-pdf">📕</div>
-        <div class="doc-info">
-          <div class="doc-name">矢印設置予定マップ（市道占用）</div>
-          <div class="doc-meta">矢印設置予定マップ_市道占用.pdf</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-    </div>
+    <a href="https://drive.google.com/open?id=1OPbcHFBi9WfBj7dxxd0_EuonBGilMD7o&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">駐車場マップ</div>
+        <div class="doc-meta">トレラン駐車場マップ春の陣2026.png</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
+    <a href="https://drive.google.com/open?id=1KpvazvDMjIIw06scS95R9FYlhree26HW&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">矢印設置予定マップ（市道占用）</div>
+        <div class="doc-meta">矢印設置予定マップ_市道占用.pdf</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
   </div>
 
-  <!-- 素材 -->
+  <!-- 素材・ロゴ -->
   <div class="card">
     <div class="card-header">
-      <span class="icon">🎨</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       <h2>素材・ロゴ</h2>
     </div>
-    <div class="card-body">
-      <a href="https://drive.google.com/open?id=1-TF22QvVWKbK3TuSsJ00_N2zNcJO2qcr&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-img">🖼️</div>
-        <div class="doc-info">
-          <div class="doc-name">春の陣ロゴ</div>
-          <div class="doc-meta">春の陣ロゴ.JPG</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-    </div>
+    <a href="https://drive.google.com/open?id=1-TF22QvVWKbK3TuSsJ00_N2zNcJO2qcr&usp=drive_copy" target="_blank" rel="noopener" class="doc-link">
+      <div class="doc-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+      <div class="doc-info">
+        <div class="doc-name">春の陣ロゴ</div>
+        <div class="doc-meta">春の陣ロゴ.JPG</div>
+      </div>
+      <div class="doc-arrow">›</div>
+    </a>
   </div>
 
 </div>
 
-<!-- ===== TAB: KNOWHOW ===== -->
+<!-- ══════════════════════════════════
+     TAB: KNOWHOW
+══════════════════════════════════ -->
 <div class="section" id="tab-knowhow">
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">🌿</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>
       <h2>草刈り作業</h2>
     </div>
-    <div class="card-body">
-      <div class="knowhow-item">
+    <div class="kh-body">
+      <div class="kh-item">
         <span class="tag tag-important">重要</span>
         <h3>作業前の確認事項</h3>
         <ul>
@@ -441,12 +506,12 @@ body {
           <li>2名以上で作業すること（単独禁止）</li>
         </ul>
       </div>
-      <div class="knowhow-item">
+      <div class="kh-item">
         <span class="tag tag-info">手順</span>
         <h3>ステータス更新の仕方</h3>
         <p>草刈り管理ツールを開き、地図上の区間（色付きライン）をタップ。ステータスを「作業中」→「完了」に変更し、作業者名・日付を入力して「保存する」を押す。</p>
       </div>
-      <div class="knowhow-item">
+      <div class="kh-item">
         <span class="tag tag-tip">ヒント</span>
         <h3>エリア別の注意点</h3>
         <ul>
@@ -460,11 +525,11 @@ body {
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">🪜</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       <h2>階段・ロープ整備</h2>
     </div>
-    <div class="card-body">
-      <div class="knowhow-item">
+    <div class="kh-body">
+      <div class="kh-item">
         <span class="tag tag-important">重要</span>
         <h3>ロープ設置の基準</h3>
         <ul>
@@ -473,7 +538,7 @@ body {
           <li>固定は木の根元・杭を使用（立木への直接結束は根元のみ）</li>
         </ul>
       </div>
-      <div class="knowhow-item">
+      <div class="kh-item">
         <span class="tag tag-info">手順</span>
         <h3>Ikejiri_Entrance（池尻入口）について</h3>
         <p>大型階段あり。太ロープ×2 + タイガーロープ×2が設置済み。降り口の角度が特に急なため、ランナー体験者によるレビュー必須。</p>
@@ -483,21 +548,21 @@ body {
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">🙋</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <h2>誘導ボランティア</h2>
     </div>
-    <div class="card-body">
-      <div class="knowhow-item">
+    <div class="kh-body">
+      <div class="kh-item">
         <span class="tag tag-info">手順</span>
         <h3>当日の配置確認</h3>
         <p>誘導人員管理ツールで各ポイントをタップし、メンバー名を入力して「配置済み」に変更する。撤収後も必ず「撤収済み」に更新すること。</p>
       </div>
-      <div class="knowhow-item">
+      <div class="kh-item">
         <span class="tag tag-tip">ヒント</span>
         <h3>ランナー通過予想時刻</h3>
         <p>各誘導ポイントをタップすると先頭〜最後尾の通過予想時刻が表示される。配置時間の目安として活用すること。</p>
       </div>
-      <div class="knowhow-item">
+      <div class="kh-item">
         <span class="tag tag-important">注意</span>
         <h3>必須ポイント (#1〜#12)</h3>
         <p>必須ポイントは1人でも欠員が出た場合、大会前日に緊急連絡あり。代替要員リストを必ず確認しておくこと。</p>
@@ -507,11 +572,11 @@ body {
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">📋</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       <h2>申請書類 提出ノウハウ</h2>
     </div>
-    <div class="card-body">
-      <div class="knowhow-item">
+    <div class="kh-body">
+      <div class="kh-item">
         <span class="tag tag-info">スケジュール</span>
         <h3>提出タイムライン（目安）</h3>
         <ul>
@@ -521,7 +586,7 @@ body {
           <li>大会の1ヶ月前: 各書類コピーをDriveにアップ</li>
         </ul>
       </div>
-      <div class="knowhow-item">
+      <div class="kh-item">
         <span class="tag tag-tip">ヒント</span>
         <h3>書類アップロードのルール</h3>
         <ul>
@@ -535,151 +600,145 @@ body {
 
 </div>
 
-<!-- ===== TAB: MAP ===== -->
+<!-- ══════════════════════════════════
+     TAB: MAP
+══════════════════════════════════ -->
 <div class="section" id="tab-map">
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">🏁</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 14 8 14s8-8.75 8-14a8 8 0 0 0-8-8z"/></svg>
       <h2>スタート・ゴール（松代城）</h2>
     </div>
-    <div class="card-body">
-      <div class="map-wrapper">
-        <!-- 松代城付近の Google Maps 埋め込み -->
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3202.4!2d138.6151!3d37.1321!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5ff4d0b6d3e1c1a5%3A0x1234567890abcdef!2z5p2x5Luj5Z-O!5e0!3m2!1sja!2sjp!4v1234567890"
-          allowfullscreen="" loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade">
-        </iframe>
-      </div>
-      <a href="https://maps.app.goo.gl/matsudaicastle" target="_blank" rel="noopener" class="map-link">
-        📍 Google Maps で開く
-      </a>
+    <div class="map-wrap">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3202.4!2d138.6151!3d37.1321!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x5ff4d0b6d3e1c1a5%3A0x1234567890abcdef!2z5p2x5Luj5Z-O!5e0!3m2!1sja!2sjp!4v1234567890" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
+    <a href="https://maps.app.goo.gl/matsudaicastle" target="_blank" rel="noopener" class="map-btn">Google Maps で開く</a>
   </div>
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">⛽</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l19-9-9 19-2-8-8-2z"/></svg>
       <h2>エイドステーション</h2>
     </div>
-    <div class="card-body">
-      <a href="https://www.google.com/maps?q=37.1481,138.6101" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-link">⛽</div>
-        <div class="doc-info">
-          <div class="doc-name">Aid Station 1</div>
-          <div class="doc-meta">37.1481, 138.6101</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://www.google.com/maps?q=37.1378,138.5793" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-link">⛽</div>
-        <div class="doc-info">
-          <div class="doc-name">Aid Station 2</div>
-          <div class="doc-meta">37.1378, 138.5793</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://www.google.com/maps?q=37.1179,138.5919" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-link">⛽</div>
-        <div class="doc-info">
-          <div class="doc-name">Aid Station 3</div>
-          <div class="doc-meta">37.1179, 138.5919</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-    </div>
+    <a href="https://www.google.com/maps?q=37.1481,138.6101" target="_blank" rel="noopener" class="loc-link">
+      <div class="loc-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 14 8 14s8-8.75 8-14a8 8 0 0 0-8-8z"/></svg></div>
+      <div class="loc-info">
+        <div class="loc-name">Aid Station 1</div>
+        <div class="loc-sub">37.1481, 138.6101</div>
+      </div>
+      <div class="loc-arrow">›</div>
+    </a>
+    <a href="https://www.google.com/maps?q=37.1378,138.5793" target="_blank" rel="noopener" class="loc-link">
+      <div class="loc-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 14 8 14s8-8.75 8-14a8 8 0 0 0-8-8z"/></svg></div>
+      <div class="loc-info">
+        <div class="loc-name">Aid Station 2</div>
+        <div class="loc-sub">37.1378, 138.5793</div>
+      </div>
+      <div class="loc-arrow">›</div>
+    </a>
+    <a href="https://www.google.com/maps?q=37.1179,138.5919" target="_blank" rel="noopener" class="loc-link">
+      <div class="loc-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 14 8 14s8-8.75 8-14a8 8 0 0 0-8-8z"/></svg></div>
+      <div class="loc-info">
+        <div class="loc-name">Aid Station 3</div>
+        <div class="loc-sub">37.1179, 138.5919</div>
+      </div>
+      <div class="loc-arrow">›</div>
+    </a>
   </div>
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">🧭</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
       <h2>その他の場所</h2>
     </div>
-    <div class="card-body">
-      <a href="https://maps.app.goo.gl/matsudai_station" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-link">🚃</div>
-        <div class="doc-info">
-          <div class="doc-name">まつだい駅（最寄り駅）</div>
-          <div class="doc-meta">北越急行ほくほく線</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-      <a href="https://maps.app.goo.gl/matsudai_parking" target="_blank" rel="noopener" class="doc-link">
-        <div class="doc-icon doc-icon-link">🅿️</div>
-        <div class="doc-info">
-          <div class="doc-name">駐車場（スタッフ用）</div>
-          <div class="doc-meta">大会当日 スタッフ専用エリア</div>
-        </div>
-        <div class="doc-arrow">›</div>
-      </a>
-    </div>
+    <a href="https://maps.app.goo.gl/matsudai_station" target="_blank" rel="noopener" class="loc-link">
+      <div class="loc-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
+      <div class="loc-info">
+        <div class="loc-name">まつだい駅（最寄り駅）</div>
+        <div class="loc-sub">北越急行ほくほく線</div>
+      </div>
+      <div class="loc-arrow">›</div>
+    </a>
+    <a href="https://maps.app.goo.gl/matsudai_parking" target="_blank" rel="noopener" class="loc-link">
+      <div class="loc-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg></div>
+      <div class="loc-info">
+        <div class="loc-name">駐車場（スタッフ用）</div>
+        <div class="loc-sub">大会当日 スタッフ専用エリア</div>
+      </div>
+      <div class="loc-arrow">›</div>
+    </a>
   </div>
 
 </div>
 
-<!-- ===== TAB: UPDATES ===== -->
+<!-- ══════════════════════════════════
+     TAB: UPDATES
+══════════════════════════════════ -->
 <div class="section" id="tab-updates">
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">🕓</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       <h2>更新履歴</h2>
     </div>
-    <div class="card-body">
-      <!-- 新しい更新を上に追加してください -->
-      <div class="update-item">
-        <div class="update-date">2026-06-22</div>
-        <div class="update-body">
-          <div class="update-title">チームポータル開設 <span class="badge badge-new">NEW</span></div>
-          <div class="update-detail">書類リンク集・ノウハウ・地図をまとめたポータルページを追加しました。</div>
-        </div>
+    <div class="upd-item">
+      <div class="upd-date">2026-06-23</div>
+      <div>
+        <div class="upd-title">デザインリニューアル <span class="badge badge-new">NEW</span></div>
+        <div class="upd-detail">モノクロ・ミニマルUIにデザインを全面刷新。絵文字→SVGアイコン、カラーコード廃止。</div>
       </div>
-      <div class="update-item">
-        <div class="update-date">2026-06-01</div>
-        <div class="update-body">
-          <div class="update-title">誘導人員管理ツール追加</div>
-          <div class="update-detail">guidancevolunteer.html を追加。ランナー通過予想時刻の自動計算機能付き。</div>
-        </div>
+    </div>
+    <div class="upd-item">
+      <div class="upd-date">2026-06-22</div>
+      <div>
+        <div class="upd-title">書類リンク全14件を設定 <span class="badge badge-updated">更新</span></div>
+        <div class="upd-detail">Google Drive の実リンクを各書類に設定完了。</div>
       </div>
-      <div class="update-item">
-        <div class="update-date">2026-05-15</div>
-        <div class="update-body">
-          <div class="update-title">草刈り管理ツール 階段ポイント追加 <span class="badge badge-updated">更新</span></div>
-          <div class="update-detail">階段・ロープ12ポイントをマップ上に追加。ステータス管理に対応。</div>
-        </div>
+    </div>
+    <div class="upd-item">
+      <div class="upd-date">2026-06-22</div>
+      <div>
+        <div class="upd-title">チームポータル開設</div>
+        <div class="upd-detail">書類リンク集・ノウハウ・地図をまとめたポータルページを追加。</div>
       </div>
-      <div class="update-item">
-        <div class="update-date">2026-05-01</div>
-        <div class="update-body">
-          <div class="update-title">草刈り管理ツール公開</div>
-          <div class="update-detail">index.html として25区間の草刈り進捗管理ツールを公開。</div>
-        </div>
+    </div>
+    <div class="upd-item">
+      <div class="upd-date">2026-06-01</div>
+      <div>
+        <div class="upd-title">誘導人員管理ツール追加</div>
+        <div class="upd-detail">guidancevolunteer.html を追加。ランナー通過予想時刻の自動計算機能付き。</div>
+      </div>
+    </div>
+    <div class="upd-item">
+      <div class="upd-date">2026-05-15</div>
+      <div>
+        <div class="upd-title">草刈り管理ツール 階段ポイント追加 <span class="badge badge-updated">更新</span></div>
+        <div class="upd-detail">階段・ロープ12ポイントをマップ上に追加。ステータス管理に対応。</div>
       </div>
     </div>
   </div>
 
   <div class="card">
     <div class="card-header">
-      <span class="icon">📌</span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       <h2>お知らせ・ToDo</h2>
     </div>
-    <div class="card-body">
-      <!-- ここに当面のToDo・メモを追記する -->
-      <div class="knowhow-item">
+    <div class="kh-body">
+      <div class="kh-item">
         <span class="tag tag-important">未完了</span>
-        <h3>Googleドライブリンクの設定</h3>
-        <p>「書類」タブの各リンク（XXXXXXXX）を実際のGoogle DriveファイルIDに書き換えてください。</p>
+        <h3>Google Maps 埋め込みURL の設定</h3>
+        <p>「地図」タブの iframe src を実際の埋め込みURLに書き換えてください。</p>
       </div>
-      <div class="knowhow-item">
+      <div class="kh-item">
         <span class="tag tag-important">未完了</span>
-        <h3>Google Maps埋め込みURLの設定</h3>
-        <p>「地図」タブのiframe src URL を実際の埋め込みURLに書き換えてください。</p>
+        <h3>全書類フォルダリンクの設定</h3>
+        <p>ツールタブ「Google Drive — 全書類フォルダ」のリンクを実際のURLに書き換えてください。</p>
       </div>
-      <div class="knowhow-item">
+      <div class="kh-item">
         <span class="tag tag-tip">完了</span>
-        <h3>草刈り全区間 ステータス入力</h3>
-        <p>草刈り管理ツールにて全25区間の初期ステータスを入力済み。</p>
+        <h3>個別書類リンク 14件設定済み</h3>
+        <p>書類タブの全ファイルにGoogle Driveリンクを設定済み。</p>
       </div>
     </div>
   </div>
@@ -688,21 +747,17 @@ body {
 
 <div class="footer">
   越後まつだい 春の陣 チームポータル<br>
-  <a href="https://github.com/NaobumiTanaka/harunojin" target="_blank" rel="noopener" style="color:#aaa;">github.com/NaobumiTanaka/harunojin</a>
+  <a href="https://github.com/NaobumiTanaka/harunojin" target="_blank" rel="noopener">github.com/NaobumiTanaka/harunojin</a>
 </div>
 
 <script>
-function showTab(name) {
-  // sections
+function showTab(name, btn) {
   document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  // tabs
   document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  // scroll to top
-  window.scrollTo({ top: 0 });
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 </script>
-
 </body>
 </html>
